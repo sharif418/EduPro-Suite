@@ -1,0 +1,291 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  TEACHER
+  STUDENT
+  GUARDIAN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  ON_LEAVE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  staff Staff?
+
+  @@map("users")
+}
+
+// Academic Year model
+model AcademicYear {
+  id        String   @id @default(cuid())
+  year      String   @unique // e.g., "2025-2026"
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  isCurrent Boolean  @default(false) @map("is_current")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  enrollments Enrollment[]
+
+  @@map("academic_years")
+}
+
+// Class Level model (e.g., "Class 6", "Dakhil 1st Year")
+model ClassLevel {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  sections        Section[]
+  classSubjects   ClassSubject[]
+  enrollments     Enrollment[]
+
+  @@map("class_levels")
+}
+
+// Section model (e.g., "A", "Blue")
+model Section {
+  id           String   @id @default(cuid())
+  name         String
+  classLevelId String   @map("class_level_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  classLevel  ClassLevel   @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+
+  @@unique([name, classLevelId]) // Unique section name per class
+  @@map("sections")
+}
+
+// Subject model (e.g., "Mathematics", "Hadith Sharif")
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  subjectCode String   @unique @map("subject_code")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  classSubjects ClassSubject[]
+
+  @@map("subjects")
+}
+
+// Join table for many-to-many relationship between ClassLevel and Subject
+model ClassSubject {
+  id           String   @id @default(cuid())
+  classLevelId String   @map("class_level_id")
+  subjectId    String   @map("subject_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([classLevelId, subjectId]) // Prevent duplicate assignments
+  @@map("class_subjects")
+}
+
+// Guardian model for parent/guardian information
+model Guardian {
+  id               String   @id @default(cuid())
+  name             String
+  relationToStudent String  @map("relation_to_student") // e.g., "Father", "Mother", "Guardian"
+  contactNumber    String   @map("contact_number")
+  email            String?
+  occupation       String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  students Student[]
+
+  @@map("guardians")
+}
+
+// Student Address model
+model StudentAddress {
+  id               String   @id @default(cuid())
+  presentAddress   String   @map("present_address")
+  permanentAddress String   @map("permanent_address")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  student Student?
+
+  @@map("student_addresses")
+}
+
+// Student model - central model for student information
+model Student {
+  id               String    @id @default(cuid())
+  studentId        String    @unique @map("student_id") // Human-readable ID like "STU-2025-0001"
+  name             String
+  email            String?   @unique
+  dateOfBirth      DateTime  @map("date_of_birth")
+  gender           Gender
+  bloodGroup       String?   @map("blood_group")
+  religion         String?
+  nationality      String?
+  studentPhotoUrl  String?   @map("student_photo_url")
+  admissionDate    DateTime  @map("admission_date")
+  guardianId       String    @map("guardian_id")
+  addressId        String    @unique @map("address_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  guardian         Guardian        @relation(fields: [guardianId], references: [id], onDelete: Restrict)
+  address          StudentAddress  @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  enrollments      Enrollment[]
+
+  @@map("students")
+}
+
+// Enrollment model - tracks student's enrollment in classes across academic years
+model Enrollment {
+  id             String   @id @default(cuid())
+  studentId      String   @map("student_id")
+  classLevelId   String   @map("class_level_id")
+  sectionId      String   @map("section_id")
+  academicYearId String   @map("academic_year_id")
+  rollNumber     Int      @map("roll_number")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classLevel   ClassLevel   @relation(fields: [classLevelId], references: [id], onDelete: Restrict)
+  section      Section      @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+
+  @@unique([studentId, academicYearId]) // One enrollment per student per academic year
+  @@unique([sectionId, academicYearId, rollNumber]) // Unique roll number per section per year
+  @@map("enrollments")
+}
+
+// Staff Address model - similar to StudentAddress for staff addresses
+model StaffAddress {
+  id               String   @id @default(cuid())
+  presentAddress   String   @map("present_address")
+  permanentAddress String   @map("permanent_address")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  staff Staff?
+
+  @@map("staff_addresses")
+}
+
+// Staff model - central model for all employees
+model Staff {
+  id              String   @id @default(cuid())
+  staffId         String   @unique @map("staff_id") // Human-readable ID like "EMP-2025-0001"
+  name            String
+  email           String   @unique
+  designation     String   // e.g., "Assistant Teacher", "Principal"
+  department      String   // e.g., "Science", "Mathematics"
+  dateOfBirth     DateTime @map("date_of_birth")
+  gender          Gender
+  contactNumber   String   @map("contact_number")
+  joiningDate     DateTime @map("joining_date")
+  qualification   String
+  userId          String   @unique @map("user_id")
+  addressId       String   @unique @map("address_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address         StaffAddress   @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  attendances     StaffAttendance[]
+  leaveRequests   LeaveRequest[]
+
+  @@map("staff")
+}
+
+// Staff Attendance model - tracks daily attendance for staff
+model StaffAttendance {
+  id        String           @id @default(cuid())
+  staffId   String           @map("staff_id")
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  remarks   String?
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, date]) // One attendance record per staff per day
+  @@map("staff_attendances")
+}
+
+// Leave Request model - manages leave applications
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  staffId     String      @map("staff_id")
+  leaveType   String      @map("leave_type")
+  startDate   DateTime    @db.Date @map("start_date")
+  endDate     DateTime    @db.Date @map("end_date")
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  approvedBy  String?     @map("approved_by")
+  approvedAt  DateTime?   @map("approved_at")
+  remarks     String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@map("leave_requests")
+}

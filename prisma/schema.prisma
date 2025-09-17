@@ -1,0 +1,541 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  TEACHER
+  STUDENT
+  GUARDIAN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  ON_LEAVE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MOBILE_BANKING
+  ONLINE_GATEWAY
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  staff Staff?
+
+  @@map("users")
+}
+
+// Academic Year model
+model AcademicYear {
+  id        String   @id @default(cuid())
+  year      String   @unique // e.g., "2025-2026"
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  enrollments Enrollment[]
+  exams       Exam[]
+
+  @@map("academic_years")
+}
+
+// Class Level model (e.g., "Class 6", "Dakhil 1st Year")
+model ClassLevel {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sections        Section[]
+  classSubjects   ClassSubject[]
+  enrollments     Enrollment[]
+  examSchedules   ExamSchedule[]
+  feeStructures   FeeStructure[]
+
+  @@map("class_levels")
+}
+
+// Section model (e.g., "A", "Blue")
+model Section {
+  id           String   @id @default(cuid())
+  name         String
+  classLevelId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  classLevel  ClassLevel   @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+
+  @@unique([name, classLevelId]) // Unique section name per class
+  @@map("sections")
+}
+
+// Subject model (e.g., "Mathematics", "Hadith Sharif")
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  subjectCode String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  classSubjects ClassSubject[]
+  examSchedules ExamSchedule[]
+
+  @@map("subjects")
+}
+
+// Join table for many-to-many relationship between ClassLevel and Subject
+model ClassSubject {
+  id           String   @id @default(cuid())
+  classLevelId String
+  subjectId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([classLevelId, subjectId]) // Prevent duplicate assignments
+  @@map("class_subjects")
+}
+
+// Guardian model for parent/guardian information
+model Guardian {
+  id                String   @id @default(cuid())
+  name              String
+  relationToStudent String   // e.g., "Father", "Mother", "Guardian"
+  contactNumber     String
+  email             String?
+  occupation        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  students Student[]
+
+  @@map("guardians")
+}
+
+// Student Address model
+model StudentAddress {
+  id               String   @id @default(cuid())
+  presentAddress   String
+  permanentAddress String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  student Student?
+
+  @@map("student_addresses")
+}
+
+// Student model - central model for student information
+model Student {
+  id              String    @id @default(cuid())
+  studentId       String    @unique // Human-readable ID like "STU-2025-0001"
+  name            String
+  email           String?   @unique
+  dateOfBirth     DateTime
+  gender          Gender
+  bloodGroup      String?
+  religion        String?
+  nationality     String?
+  studentPhotoUrl String?
+  admissionDate   DateTime
+  guardianId      String
+  addressId       String    @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  guardian         Guardian        @relation(fields: [guardianId], references: [id], onDelete: Restrict)
+  address          StudentAddress  @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  enrollments      Enrollment[]
+  invoices         Invoice[]
+
+  @@map("students")
+}
+
+// Enrollment model - tracks student's enrollment in classes across academic years
+model Enrollment {
+  id             String   @id @default(cuid())
+  studentId      String
+  classLevelId   String
+  sectionId      String
+  academicYearId String
+  rollNumber     Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classLevel   ClassLevel   @relation(fields: [classLevelId], references: [id], onDelete: Restrict)
+  section      Section      @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  marks        Marks[]
+  results      Result[]
+
+  @@unique([studentId, academicYearId]) // One enrollment per student per academic year
+  @@unique([sectionId, academicYearId, rollNumber]) // Unique roll number per section per year
+  @@map("enrollments")
+}
+
+// Staff Address model - similar to StudentAddress for staff addresses
+model StaffAddress {
+  id               String   @id @default(cuid())
+  presentAddress   String
+  permanentAddress String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  staff Staff?
+
+  @@map("staff_addresses")
+}
+
+// Staff model - central model for all employees
+model Staff {
+  id              String   @id @default(cuid())
+  staffId         String   @unique // Human-readable ID like "EMP-2025-0001"
+  name            String
+  email           String   @unique
+  designation     String   // e.g., "Assistant Teacher", "Principal"
+  department      String   // e.g., "Science", "Mathematics"
+  dateOfBirth     DateTime
+  gender          Gender
+  contactNumber   String
+  joiningDate     DateTime
+  qualification   String
+  userId          String   @unique
+  addressId       String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address         StaffAddress   @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  attendances     StaffAttendance[]
+  leaveRequests   LeaveRequest[]
+
+  @@map("staff")
+}
+
+// Staff Attendance model - tracks daily attendance for staff
+model StaffAttendance {
+  id        String           @id @default(cuid())
+  staffId   String
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  remarks   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  // Relations
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, date]) // One attendance record per staff per day
+  @@map("staff_attendances")
+}
+
+// Leave Request model - manages leave applications
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  staffId     String
+  leaveType   String
+  startDate   DateTime    @db.Date
+  endDate     DateTime    @db.Date
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  approvedBy  String?
+  approvedAt  DateTime?
+  remarks     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@map("leave_requests")
+}
+
+// ============================================================================
+// EXAMINATION & RESULT MANAGEMENT MODELS
+// ============================================================================
+
+// Grading System model - allows admins to define their own grading scales
+model GradingSystem {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "Standard GPA 5", "Percentage Based"
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  grades  Grade[]
+  results Result[]
+
+  @@map("grading_systems")
+}
+
+// Grade model - represents a single grade within a grading system
+model Grade {
+  id              String   @id @default(cuid())
+  gradingSystemId String
+  gradeName       String   // e.g., "A+", "A", "B+", "B"
+  minPercentage   Float    // e.g., 80.0
+  maxPercentage   Float    // e.g., 100.0
+  points          Float    // e.g., 5.0, 4.0, 3.5
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  gradingSystem GradingSystem @relation(fields: [gradingSystemId], references: [id], onDelete: Cascade)
+  marks         Marks[]
+  results       Result[]
+
+  @@unique([gradingSystemId, gradeName]) // Unique grade name per grading system
+  @@unique([gradingSystemId, minPercentage, maxPercentage]) // No overlapping ranges
+  @@map("grades")
+}
+
+// Exam model - represents a major examination event
+model Exam {
+  id             String   @id @default(cuid())
+  name           String   // e.g., "Annual Examination 2025", "Mid-Term Exam"
+  academicYearId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  academicYear  AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  examSchedules ExamSchedule[]
+  results       Result[]
+
+  @@unique([name, academicYearId]) // Unique exam name per academic year
+  @@map("exams")
+}
+
+// ExamSchedule model - schedules a specific subject's exam for a class
+model ExamSchedule {
+  id           String    @id @default(cuid())
+  examId       String
+  classLevelId String
+  subjectId    String
+  examDate     DateTime  @db.Date
+  startTime    String    // e.g., "09:00"
+  endTime      String    // e.g., "12:00"
+  fullMarks    Float     // e.g., 100.0
+  passMarks    Float     // e.g., 40.0
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  exam       Exam        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  classLevel ClassLevel  @relation(fields: [classLevelId], references: [id], onDelete: Restrict)
+  subject    Subject     @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  marks      Marks[]
+
+  @@unique([examId, classLevelId, subjectId]) // One schedule per exam-class-subject combination
+  @@map("exam_schedules")
+}
+
+// Marks model - the core table to store individual student marks
+model Marks {
+  id             String   @id @default(cuid())
+  enrollmentId   String   // Links to student enrollment (student + class + academic year)
+  examScheduleId String
+  marksObtained  Float    // e.g., 85.5
+  gradeId        String?  // Calculated grade based on percentage
+  remarks        String?  // Optional remarks like "Excellent", "Needs improvement"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  enrollment   Enrollment   @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  examSchedule ExamSchedule @relation(fields: [examScheduleId], references: [id], onDelete: Cascade)
+  grade        Grade?       @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+
+  @@unique([enrollmentId, examScheduleId]) // One mark entry per student per exam schedule
+  @@map("marks")
+}
+
+// Result model - stores the final processed result of a student for an exam
+model Result {
+  id              String   @id @default(cuid())
+  enrollmentId    String   // Links to student enrollment
+  examId          String
+  totalMarks      Float    // Sum of all marks obtained
+  totalFullMarks  Float    // Sum of all full marks
+  percentage      Float    // Calculated percentage
+  gpa             Float    // Calculated GPA based on grading system
+  finalGradeId    String   // Overall grade for the exam
+  gradingSystemId String   // Which grading system was used
+  rank            Int?     // Rank in class (calculated)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  enrollment    Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  exam          Exam          @relation(fields: [examId], references: [id], onDelete: Cascade)
+  finalGrade    Grade         @relation(fields: [finalGradeId], references: [id], onDelete: Restrict)
+  gradingSystem GradingSystem @relation(fields: [gradingSystemId], references: [id], onDelete: Restrict)
+
+  @@unique([enrollmentId, examId]) // One result per student per exam
+  @@map("results")
+}
+
+// ============================================================================
+// FINANCE & ACCOUNTING MODELS
+// ============================================================================
+
+// FeeHead model - represents a category for fees (e.g., "Monthly Tuition Fee", "Exam Fee")
+model FeeHead {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "Monthly Tuition Fee", "Exam Fee", "Library Fee"
+  description String?  // Optional description of the fee
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  feeStructures FeeStructure[]
+  invoiceItems  InvoiceItem[]
+
+  @@map("fee_heads")
+}
+
+// FeeStructure model - defines the amount for a FeeHead for a specific ClassLevel
+model FeeStructure {
+  id           String   @id @default(cuid())
+  feeHeadId    String
+  classLevelId String
+  amount       Decimal  @db.Decimal(10, 2) // e.g., 5000.00
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  feeHead    FeeHead    @relation(fields: [feeHeadId], references: [id], onDelete: Cascade)
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+
+  @@unique([feeHeadId, classLevelId]) // One fee structure per fee head per class
+  @@map("fee_structures")
+}
+
+// Invoice model - represents an automatically generated bill for a student
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique // e.g., "INV-2025-0001"
+  studentId     String
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  invoiceItems InvoiceItem[]
+  payments     Payment[]
+
+  @@map("invoices")
+}
+
+// InvoiceItem model - a single item within an invoice
+model InvoiceItem {
+  id        String   @id @default(cuid())
+  invoiceId String
+  feeHeadId String
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  feeHead FeeHead @relation(fields: [feeHeadId], references: [id], onDelete: Restrict)
+
+  @@map("invoice_items")
+}
+
+// Payment model - records a payment made against an invoice
+model Payment {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  paymentDate   DateTime      @default(now())
+  amountPaid    Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod
+  transactionId String?       // Optional transaction ID from payment gateway
+  remarks       String?       // Optional remarks
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// Expense model - tracks institutional expenses
+model Expense {
+  id          String   @id @default(cuid())
+  expenseHead String   // e.g., "Salaries", "Utilities", "Maintenance"
+  amount      Decimal  @db.Decimal(10, 2)
+  expenseDate DateTime @default(now())
+  description String?  // Optional description
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("expenses")
+}

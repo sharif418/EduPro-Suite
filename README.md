@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EduPro Suite - Next.js Application
+
+A minimal, production-ready Next.js application displaying "EduPro Suite is coming soon!" message.
+
+## Features
+
+- **Next.js 15.5.3** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **ESLint** for code quality
+- **Production-optimized Docker container**
+- **Responsive design** with centered message
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18.x or higher
+- npm or yarn
+- Docker (for containerized deployment)
+
+### Local Development
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Production Build
 
-## Learn More
+Build the application for production:
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Docker Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Build Docker Image
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker build -t edupro-suite .
+```
 
-## Deploy on Vercel
+### Run Docker Container
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker run -p 3000:3000 edupro-suite
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+## Docker Configuration
+
+The Dockerfile uses a multi-stage build process for optimization:
+
+1. **Dependencies stage**: Installs npm dependencies
+2. **Builder stage**: Builds the Next.js application
+3. **Runner stage**: Creates minimal production image
+
+Key optimizations:
+- Uses Alpine Linux for smaller image size
+- Leverages Next.js standalone output for minimal runtime
+- Runs as non-root user for security
+- Optimized layer caching
+
+## Project Structure
+
+```
+edupro-suite/
+├── app/
+│   ├── globals.css          # Global styles
+│   ├── layout.tsx           # Root layout
+│   └── page.tsx             # Main page component
+├── public/                  # Static assets
+├── .dockerignore           # Docker ignore rules
+├── .gitignore              # Git ignore rules
+├── Dockerfile              # Production Docker configuration
+├── eslint.config.mjs       # ESLint configuration
+├── next.config.ts          # Next.js configuration
+├── package.json            # Dependencies and scripts
+├── postcss.config.mjs      # PostCSS configuration
+├── tailwind.config.ts      # Tailwind CSS configuration
+└── tsconfig.json           # TypeScript configuration
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Configuration
+
+### Next.js Configuration
+
+The application is configured with:
+- `output: 'standalone'` for Docker optimization
+- App Router for modern React patterns
+
+### Tailwind CSS
+
+Responsive design with:
+- Gradient background
+- Dark mode support
+- Centered layout
+- Typography scaling
+
+## Deployment
+
+The application is ready for deployment on:
+- Docker containers
+- Vercel
+- Netlify
+- Any Node.js hosting platform
+
+## License
+
+This project is created for educational purposes.
