@@ -168,6 +168,8 @@
   --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-bengali: var(--font-hind-siliguri);
+  --font-arabic: var(--font-almarai);
 }
 
 /* Smooth Transitions for Theme Switching */
@@ -186,6 +188,113 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Multi-language Font Support */
+[lang="bn"], [lang="bn"] * {
+  font-family: var(--font-bengali), var(--font-geist-sans), Arial, sans-serif;
+}
+
+[lang="ar"], [lang="ar"] * {
+  font-family: var(--font-arabic), var(--font-geist-sans), Arial, sans-serif;
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* RTL Layout Support using CSS Logical Properties */
+[dir="rtl"] .ml-auto {
+  margin-inline-start: auto;
+  margin-left: unset;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-inline-end: auto;
+  margin-right: unset;
+}
+
+[dir="rtl"] .pl-4 {
+  padding-inline-start: 1rem;
+  padding-left: unset;
+}
+
+[dir="rtl"] .pr-4 {
+  padding-inline-end: 1rem;
+  padding-right: unset;
+}
+
+[dir="rtl"] .border-l {
+  border-inline-start-width: 1px;
+  border-left-width: unset;
+}
+
+[dir="rtl"] .border-r {
+  border-inline-end-width: 1px;
+  border-right-width: unset;
+}
+
+/* RTL Flexbox Support */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 1rem;
+  margin-left: unset;
+}
+
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 0.5rem;
+  margin-left: unset;
+}
+
+/* RTL Navigation Support */
+[dir="rtl"] .sidebar {
+  right: 0;
+  left: unset;
+}
+
+[dir="rtl"] .dropdown-menu {
+  right: 0;
+  left: unset;
+}
+
+/* RTL Form Support */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+}
+
+/* RTL Table Support */
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+/* RTL Icon Support */
+[dir="rtl"] .icon-chevron-right {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .icon-arrow-right {
+  transform: scaleX(-1);
 }
 
 /* Scrollbar Styling */

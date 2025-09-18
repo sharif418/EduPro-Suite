@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from '../../../../components/ui/Button';
-import { useToast } from '../../../../components/ui/Toast';
+import { Button } from '../../../../../components/ui/Button';
+import { useToast } from '../../../../../components/ui/Toast';
 
 interface AcademicYear {
   id: string;

@@ -64,7 +64,10 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  staff Staff?
+  staff                    Staff?
+  notifications            Notification[]
+  notificationPreferences  NotificationPreference[]
+  pushSubscriptions        PushSubscription[]
 
   @@map("users")
 }
@@ -538,4 +541,163 @@ model Expense {
   updatedAt   DateTime @updatedAt
 
   @@map("expenses")
+}
+
+// ============================================================================
+// NOTIFICATION SYSTEM MODELS
+// ============================================================================
+
+enum NotificationPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  READ
+}
+
+enum NotificationType {
+  SYSTEM
+  ACADEMIC
+  FINANCIAL
+  ATTENDANCE
+  EXAM
+  ANNOUNCEMENT
+  REMINDER
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+// Notification Template model - predefined notification templates
+model NotificationTemplate {
+  id          String           @id @default(cuid())
+  name        String           @unique // e.g., "exam_reminder", "fee_due"
+  type        NotificationType
+  priority    NotificationPriority @default(MEDIUM)
+  title       Json             // Multi-language titles: {"en": "...", "bn": "...", "ar": "..."}
+  content     Json             // Multi-language content
+  channels    NotificationChannel[] // Supported channels for this template
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  notifications Notification[]
+
+  @@map("notification_templates")
+}
+
+// Notification model - individual notification instances
+model Notification {
+  id         String             @id @default(cuid())
+  templateId String?            // Optional: if based on a template
+  userId     String             // Recipient user ID
+  type       NotificationType
+  priority   NotificationPriority @default(MEDIUM)
+  title      String             // Final rendered title
+  content    String             // Final rendered content
+  data       Json?              // Additional data payload
+  channels   NotificationChannel[] // Channels to send through
+  status     NotificationStatus @default(PENDING)
+  scheduledAt DateTime?         // For scheduled notifications
+  sentAt     DateTime?          // When notification was sent
+  readAt     DateTime?          // When notification was read
+  expiresAt  DateTime?          // Optional expiration date
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  // Relations
+  template         NotificationTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveryAttempts NotificationDelivery[]
+  queue            NotificationQueue?
+
+  @@index([userId, status])
+  @@index([priority, scheduledAt])
+  @@map("notifications")
+}
+
+// Notification Delivery model - tracks delivery attempts across channels
+model NotificationDelivery {
+  id             String            @id @default(cuid())
+  notificationId String
+  channel        NotificationChannel
+  status         NotificationStatus @default(PENDING)
+  attemptCount   Int               @default(0)
+  lastAttemptAt  DateTime?
+  deliveredAt    DateTime?
+  failureReason  String?           // Error message if failed
+  externalId     String?           // External service ID (e.g., email message ID)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  // Relations
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, channel])
+  @@map("notification_deliveries")
+}
+
+// User Notification Preferences model - user's notification settings
+model NotificationPreference {
+  id        String                @id @default(cuid())
+  userId    String
+  type      NotificationType      // Which type of notification
+  channels  NotificationChannel[] // Preferred channels for this type
+  isEnabled Boolean               @default(true)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("notification_preferences")
+}
+
+// Push Subscription model - stores push notification subscriptions
+model PushSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  endpoint   String   @unique
+  p256dh     String   // Public key for encryption
+  auth       String   // Authentication secret
+  userAgent  String?  // Browser/device info
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
+}
+
+// Notification Queue model - for managing notification processing queue
+model NotificationQueue {
+  id             String             @id @default(cuid())
+  notificationId String             @unique
+  priority       NotificationPriority
+  scheduledAt    DateTime           @default(now())
+  processedAt    DateTime?
+  failureCount   Int                @default(0)
+  lastError      String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  // Relations
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([priority, scheduledAt])
+  @@map("notification_queue")
 }

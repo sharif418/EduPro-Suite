@@ -1,11 +1,11 @@
 'use client';
 
-import { useSession } from '../hooks/useSession';
+import { useSession } from '../../hooks/useSession';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
-import { ToastProvider } from '../components/ui/Toast';
+import Sidebar from '../../components/Sidebar';
+import Header from '../../components/Header';
+import { ToastProvider } from '../../components/ui/Toast';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

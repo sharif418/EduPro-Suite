@@ -1,4 +1,12 @@
+import createIntlMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Create the internationalization middleware
+const intlMiddleware = createIntlMiddleware({
+  locales: ['en', 'bn', 'ar'],
+  defaultLocale: 'en',
+  localePrefix: 'always'
+});
 
 // Helper function to decode JWT payload (without verification for middleware)
 function decodeJWTPayload(token: string) {
@@ -20,34 +28,42 @@ function decodeJWTPayload(token: string) {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Get the auth token from cookies
-  const token = request.cookies.get('auth-token')?.value;
-  
   // If it's an API route, allow access (API routes handle their own auth)
   if (pathname.startsWith('/api')) {
     return NextResponse.next();
   }
   
+  // Handle internationalization first
+  const intlResponse = intlMiddleware(request);
+  
+  // Get the auth token from cookies
+  const token = request.cookies.get('auth-token')?.value;
+  
+  // Extract locale from pathname if present
+  const localeMatch = pathname.match(/^\/([a-z]{2})(\/.*)?$/);
+  const locale = localeMatch ? localeMatch[1] : 'en';
+  const pathWithoutLocale = localeMatch ? (localeMatch[2] || '/') : pathname;
+  
   // Handle login page access
-  if (pathname === '/login') {
+  if (pathWithoutLocale === '/login') {
     if (token) {
       // User has a token, redirect to home (let the client-side handle validation)
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
     // User doesn't have a token, allow access to login page
-    return NextResponse.next();
+    return intlResponse;
   }
 
   // Handle unauthorized page access (allow access without token check)
-  if (pathname === '/unauthorized') {
-    return NextResponse.next();
+  if (pathWithoutLocale === '/unauthorized') {
+    return intlResponse;
   }
   
   // Handle admin routes - require SUPERADMIN or ADMIN role
-  if (pathname.startsWith('/admin')) {
+  if (pathWithoutLocale.startsWith('/admin')) {
     if (!token) {
       // No token, redirect to login
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
     }
 
     try {
@@ -58,28 +74,28 @@ export function middleware(request: NextRequest) {
       // Check if user has admin privileges
       if (decoded.role !== 'SUPERADMIN' && decoded.role !== 'ADMIN') {
         // User doesn't have admin role, redirect to unauthorized page
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+        return NextResponse.redirect(new URL(`/${locale}/unauthorized`, request.url));
       }
 
       // User has admin role, allow access
-      return NextResponse.next();
+      return intlResponse;
 
     } catch (error) {
       console.error('[MIDDLEWARE_ERROR] Invalid JWT token:', error);
       // Invalid token, redirect to login
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
     }
   }
   
   // Handle other protected routes
   if (!token) {
     // User doesn't have a token, redirect to login
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
   
   // User has a token, allow access to protected route
   // The SessionProvider will handle JWT validation on the client side
-  return NextResponse.next();
+  return intlResponse;
 }
 
 export const config = {

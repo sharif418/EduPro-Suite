@@ -1,0 +1,90 @@
+{
+  "welcome": "مرحباً",
+  "dashboard": "لوحة التحكم",
+  "common": {
+    "dashboard": "لوحة التحكم",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "login": "تسجيل الدخول",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تحرير",
+    "delete": "حذف",
+    "add": "إضافة",
+    "search": "بحث",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "warning": "تحذير",
+    "info": "معلومات"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "students": "الطلاب",
+    "teachers": "المعلمون",
+    "staff": "الموظفون",
+    "classes": "الفصول",
+    "subjects": "المواد",
+    "exams": "الامتحانات",
+    "finance": "المالية",
+    "reports": "التقارير",
+    "administration": "الإدارة"
+  },
+  "auth": {
+    "welcome": "مرحباً بك في EduPro Suite",
+    "loginTitle": "تسجيل الدخول إلى حسابك",
+    "email": "عنوان البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "invalidCredentials": "بريد إلكتروني أو كلمة مرور غير صحيحة"
+  },
+  "dashboard": {
+    "welcomeMessage": "مرحباً بعودتك إلى EduPro Suite",
+    "totalStudents": "إجمالي الطلاب",
+    "totalTeachers": "إجمالي المعلمين",
+    "totalClasses": "إجمالي الفصول",
+    "recentActivity": "النشاط الأخير",
+    "quickActions": "الإجراءات السريعة",
+    "systemHealth": "صحة النظام"
+  },
+  "students": {
+    "title": "إدارة الطلاب",
+    "addStudent": "إضافة طالب جديد",
+    "studentList": "قائمة الطلاب",
+    "studentDetails": "تفاصيل الطالب",
+    "admissionNumber": "رقم القبول",
+    "fullName": "الاسم الكامل",
+    "dateOfBirth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "class": "الفصل",
+    "section": "القسم",
+    "guardianName": "اسم ولي الأمر",
+    "contactNumber": "رقم الاتصال",
+    "address": "العنوان"
+  },
+  "teachers": {
+    "title": "إدارة المعلمين",
+    "addTeacher": "إضافة معلم جديد",
+    "teacherList": "قائمة المعلمين",
+    "teacherDetails": "تفاصيل المعلم",
+    "employeeId": "رقم الموظف",
+    "qualification": "المؤهل",
+    "experience": "الخبرة",
+    "subjects": "المواد",
+    "joiningDate": "تاريخ الانضمام"
+  },
+  "finance": {
+    "title": "الإدارة المالية",
+    "feeCollection": "تحصيل الرسوم",
+    "expenses": "المصروفات",
+    "invoices": "الفواتير",
+    "payments": "المدفوعات",
+    "reports": "التقارير المالية",
+    "totalRevenue": "إجمالي الإيرادات",
+    "totalExpenses": "إجمالي المصروفات",
+    "netProfit": "صافي الربح"
+  }
+}

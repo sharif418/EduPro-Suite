@@ -17,15 +17,22 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.1",
+    "@types/nodemailer": "^7.0.1",
+    "@types/web-push": "^3.6.4",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.544.0",
     "next": "15.5.3",
+    "next-intl": "^4.3.9",
+    "nodemailer": "^7.0.6",
     "prisma": "^6.16.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "tailwind-merge": "^3.3.1"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.3.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

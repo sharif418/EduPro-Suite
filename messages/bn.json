@@ -1,0 +1,90 @@
+{
+  "welcome": "স্বাগতম",
+  "dashboard": "ড্যাশবোর্ড",
+  "common": {
+    "dashboard": "ড্যাশবোর্ড",
+    "settings": "সেটিংস",
+    "logout": "লগআউট",
+    "login": "লগইন",
+    "save": "সংরক্ষণ করুন",
+    "cancel": "বাতিল",
+    "edit": "সম্পাদনা",
+    "delete": "মুছে ফেলুন",
+    "add": "যোগ করুন",
+    "search": "অনুসন্ধান",
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "warning": "সতর্কতা",
+    "info": "তথ্য"
+  },
+  "navigation": {
+    "home": "হোম",
+    "students": "শিক্ষার্থী",
+    "teachers": "শিক্ষক",
+    "staff": "কর্মচারী",
+    "classes": "ক্লাস",
+    "subjects": "বিষয়",
+    "exams": "পরীক্ষা",
+    "finance": "অর্থ",
+    "reports": "রিপোর্ট",
+    "administration": "প্রশাসন"
+  },
+  "auth": {
+    "welcome": "EduPro Suite এ স্বাগতম",
+    "loginTitle": "আপনার অ্যাকাউন্টে সাইন ইন করুন",
+    "email": "ইমেইল ঠিকানা",
+    "password": "পাসওয়ার্ড",
+    "rememberMe": "আমাকে মনে রাখুন",
+    "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+    "signIn": "সাইন ইন",
+    "signOut": "সাইন আউট",
+    "invalidCredentials": "ভুল ইমেইল বা পাসওয়ার্ড"
+  },
+  "dashboard": {
+    "welcomeMessage": "EduPro Suite এ ফিরে স্বাগতম",
+    "totalStudents": "মোট শিক্ষার্থী",
+    "totalTeachers": "মোট শিক্ষক",
+    "totalClasses": "মোট ক্লাস",
+    "recentActivity": "সাম্প্রতিক কার্যকলাপ",
+    "quickActions": "দ্রুত কার্যক্রম",
+    "systemHealth": "সিস্টেম স্বাস্থ্য"
+  },
+  "students": {
+    "title": "শিক্ষার্থী ব্যবস্থাপনা",
+    "addStudent": "নতুন শিক্ষার্থী যোগ করুন",
+    "studentList": "শিক্ষার্থী তালিকা",
+    "studentDetails": "শিক্ষার্থীর বিবরণ",
+    "admissionNumber": "ভর্তি নম্বর",
+    "fullName": "পূর্ণ নাম",
+    "dateOfBirth": "জন্ম তারিখ",
+    "gender": "লিঙ্গ",
+    "class": "ক্লাস",
+    "section": "শাখা",
+    "guardianName": "অভিভাবকের নাম",
+    "contactNumber": "যোগাযোগ নম্বর",
+    "address": "ঠিকানা"
+  },
+  "teachers": {
+    "title": "শিক্ষক ব্যবস্থাপনা",
+    "addTeacher": "নতুন শিক্ষক যোগ করুন",
+    "teacherList": "শিক্ষক তালিকা",
+    "teacherDetails": "শিক্ষকের বিবরণ",
+    "employeeId": "কর্মচারী আইডি",
+    "qualification": "যোগ্যতা",
+    "experience": "অভিজ্ঞতা",
+    "subjects": "বিষয়সমূহ",
+    "joiningDate": "যোগদানের তারিখ"
+  },
+  "finance": {
+    "title": "আর্থিক ব্যবস্থাপনা",
+    "feeCollection": "ফি সংগ্রহ",
+    "expenses": "খরচ",
+    "invoices": "চালান",
+    "payments": "পেমেন্ট",
+    "reports": "আর্থিক রিপোর্ট",
+    "totalRevenue": "মোট আয়",
+    "totalExpenses": "মোট খরচ",
+    "netProfit": "নিট লাভ"
+  }
+}

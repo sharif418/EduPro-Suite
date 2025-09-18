@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from '../../../hooks/useSession';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/Tabs';
-import { ToastProvider } from '../../../components/ui/Toast';
+import { useSession } from '../../../../hooks/useSession';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../../components/ui/Tabs';
+import { ToastProvider } from '../../../../components/ui/Toast';
 import GradingSystemsTab from './components/GradingSystemsTab';
 import ExamsTab from './components/ExamsTab';
 import ExamScheduleTab from './components/ExamScheduleTab';

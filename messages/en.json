@@ -1,0 +1,90 @@
+{
+  "welcome": "Welcome",
+  "dashboard": "Dashboard",
+  "common": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "navigation": {
+    "home": "Home",
+    "students": "Students",
+    "teachers": "Teachers",
+    "staff": "Staff",
+    "classes": "Classes",
+    "subjects": "Subjects",
+    "exams": "Examinations",
+    "finance": "Finance",
+    "reports": "Reports",
+    "administration": "Administration"
+  },
+  "auth": {
+    "welcome": "Welcome to EduPro Suite",
+    "loginTitle": "Sign in to your account",
+    "email": "Email Address",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot your password?",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "invalidCredentials": "Invalid email or password"
+  },
+  "dashboard": {
+    "welcomeMessage": "Welcome back to EduPro Suite",
+    "totalStudents": "Total Students",
+    "totalTeachers": "Total Teachers",
+    "totalClasses": "Total Classes",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions",
+    "systemHealth": "System Health"
+  },
+  "students": {
+    "title": "Student Management",
+    "addStudent": "Add New Student",
+    "studentList": "Student List",
+    "studentDetails": "Student Details",
+    "admissionNumber": "Admission Number",
+    "fullName": "Full Name",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "class": "Class",
+    "section": "Section",
+    "guardianName": "Guardian Name",
+    "contactNumber": "Contact Number",
+    "address": "Address"
+  },
+  "teachers": {
+    "title": "Teacher Management",
+    "addTeacher": "Add New Teacher",
+    "teacherList": "Teacher List",
+    "teacherDetails": "Teacher Details",
+    "employeeId": "Employee ID",
+    "qualification": "Qualification",
+    "experience": "Experience",
+    "subjects": "Subjects",
+    "joiningDate": "Joining Date"
+  },
+  "finance": {
+    "title": "Financial Management",
+    "feeCollection": "Fee Collection",
+    "expenses": "Expenses",
+    "invoices": "Invoices",
+    "payments": "Payments",
+    "reports": "Financial Reports",
+    "totalRevenue": "Total Revenue",
+    "totalExpenses": "Total Expenses",
+    "netProfit": "Net Profit"
+  }
+}

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '../../../../components/ui/Button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/Dialog';
-import { useToast } from '../../../../components/ui/Toast';
+import { Button } from '../../../../../components/ui/Button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../../components/ui/Dialog';
+import { useToast } from '../../../../../components/ui/Toast';
 
 interface Grade {
   id?: string;

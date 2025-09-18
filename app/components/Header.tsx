@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useSession } from '../hooks/useSession';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ThemeToggle, QuickThemeToggle } from './ui/ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface HeaderProps {
   title: string;
@@ -13,6 +15,7 @@ interface HeaderProps {
 export default function Header({ title, onMenuToggle }: HeaderProps) {
   const { user } = useSession();
   const router = useRouter();
+  const t = useTranslations('common');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -78,6 +81,9 @@ export default function Header({ title, onMenuToggle }: HeaderProps) {
 
         {/* Right Side Controls */}
         <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+          
           {/* Theme Toggle - Full version on larger screens */}
           <div className="hidden sm:block">
             <ThemeToggle />
@@ -150,7 +156,7 @@ export default function Header({ title, onMenuToggle }: HeaderProps) {
                 >
                   <div className="flex items-center space-x-2">
                     <span>👤</span>
-                    <span>Profile Settings</span>
+                    <span>{t('settings')}</span>
                   </div>
                 </button>
 
@@ -163,7 +169,7 @@ export default function Header({ title, onMenuToggle }: HeaderProps) {
                 >
                   <div className="flex items-center space-x-2">
                     <span>🚪</span>
-                    <span>Logout</span>
+                    <span>{t('logout')}</span>
                   </div>
                 </button>
               </div>
