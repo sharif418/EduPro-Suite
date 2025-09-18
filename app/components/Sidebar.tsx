@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation';
 
 interface SidebarProps {
   className?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ className = '' }: SidebarProps) {
+export default function Sidebar({ className = '', isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const navigationItems = [
@@ -55,59 +57,143 @@ export default function Sidebar({ className = '' }: SidebarProps) {
     return pathname.startsWith(href);
   };
 
+  const handleLinkClick = () => {
+    // Close mobile sidebar when a link is clicked
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={`bg-gradient-to-b from-indigo-900 to-purple-900 text-white h-full flex flex-col ${className}`}>
-      {/* Logo Section */}
-      <div className="p-6 border-b border-indigo-700/50">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <span className="text-xl font-bold text-white">E</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">EduPro Suite</h1>
-            <p className="text-indigo-200 text-sm">Admin Panel</p>
-          </div>
-        </div>
-      </div>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && onClose && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          {navigationItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`
-                  flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                  ${
-                    isActive(item.href)
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20'
-                      : 'text-indigo-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
+      {/* Sidebar */}
+      <div 
+        className={`
+          h-full flex flex-col transition-all duration-300 z-50
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${className}
+        `}
+        style={{
+          background: 'var(--sidebar-background)',
+          color: 'var(--sidebar-foreground)'
+        }}
+      >
+        {/* Logo Section */}
+        <div 
+          className="p-4 sm:p-6 border-b"
+          style={{ borderColor: 'var(--sidebar-border)' }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div 
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center backdrop-blur-sm"
+                style={{ backgroundColor: 'var(--sidebar-accent)' }}
               >
-                <span className="text-xl">{item.icon}</span>
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Footer Pattern */}
-      <div className="p-4 border-t border-indigo-700/50">
-        <div className="text-center text-indigo-300 text-sm">
-          <div className="mb-2 opacity-30">
-            {/* Islamic geometric pattern */}
-            <div className="flex justify-center space-x-1">
-              <div className="w-2 h-2 bg-current rounded-full"></div>
-              <div className="w-2 h-2 bg-current rounded-full"></div>
-              <div className="w-2 h-2 bg-current rounded-full"></div>
+                <span className="text-lg sm:text-xl font-bold text-white">E</span>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg sm:text-xl font-bold">EduPro Suite</h1>
+                <p className="text-xs sm:text-sm opacity-80">Admin Panel</p>
+              </div>
             </div>
+
+            {/* Mobile Close Button */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                aria-label="Close menu"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
-          <p>Admin Dashboard</p>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-3 sm:p-4 overflow-y-auto">
+          <ul className="space-y-1 sm:space-y-2">
+            {navigationItems.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={handleLinkClick}
+                  className={`
+                    flex items-center space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group
+                    ${
+                      isActive(item.href)
+                        ? 'shadow-lg backdrop-blur-sm border'
+                        : 'hover:backdrop-blur-sm'
+                    }
+                  `}
+                  style={{
+                    backgroundColor: isActive(item.href) 
+                      ? 'var(--sidebar-accent)' 
+                      : 'transparent',
+                    borderColor: isActive(item.href) 
+                      ? 'var(--sidebar-border)' 
+                      : 'transparent',
+                    color: isActive(item.href) 
+                      ? 'var(--sidebar-accent-foreground)' 
+                      : 'var(--sidebar-foreground)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive(item.href)) {
+                      e.currentTarget.style.backgroundColor = 'var(--sidebar-accent)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive(item.href)) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  <span className="text-lg sm:text-xl flex-shrink-0">{item.icon}</span>
+                  <span className="font-medium text-sm sm:text-base truncate">{item.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Footer Pattern */}
+        <div 
+          className="p-3 sm:p-4 border-t"
+          style={{ borderColor: 'var(--sidebar-border)' }}
+        >
+          <div className="text-center text-sm opacity-75">
+            <div className="mb-2 opacity-50">
+              {/* Islamic geometric pattern */}
+              <div className="flex justify-center space-x-1">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full"></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full"></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full"></div>
+              </div>
+            </div>
+            <p className="text-xs sm:text-sm">Admin Dashboard</p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
