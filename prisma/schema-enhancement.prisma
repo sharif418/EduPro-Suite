@@ -1,0 +1,407 @@
+// Enhanced Prisma Schema for Market-Leading Features
+// This extends the existing schema with new models for advanced functionality
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// OMR Integration Models
+model OmrTemplate {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  examId            String
+  totalQuestions    Int
+  questionsPerPage  Int      @default(50)
+  answerKeyType     String   @default("ABCD") // ABCD, TrueFalse, Numeric
+  templateData      Json     // Stores template configuration
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdById       String
+  
+  exam              Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  createdBy         User     @relation(fields: [createdById], references: [id])
+  omrScans          OmrScan[]
+  
+  @@map("omr_templates")
+}
+
+model OmrScan {
+  id              String   @id @default(cuid())
+  templateId      String
+  studentId       String
+  examId          String
+  scanImagePath   String
+  scanData        Json     // Raw scan data
+  processingStatus String  @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  confidenceScore Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  template        OmrTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  student         Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  exam            Exam        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  results         OmrResult[]
+  
+  @@unique([templateId, studentId, examId])
+  @@map("omr_scans")
+}
+
+model OmrResult {
+  id              String   @id @default(cuid())
+  scanId          String
+  questionNumber  Int
+  selectedAnswer  String?
+  correctAnswer   String
+  isCorrect       Boolean
+  confidenceScore Float?
+  createdAt       DateTime @default(now())
+  
+  scan            OmrScan  @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  
+  @@unique([scanId, questionNumber])
+  @@map("omr_results")
+}
+
+// Islamic Education Models
+model QuranSurah {
+  id              String   @id @default(cuid())
+  surahNumber     Int      @unique
+  arabicName      String
+  englishName     String
+  bengaliName     String
+  totalAyahs      Int
+  revelationType  String   // Meccan, Medinan
+  description     String?
+  createdAt       DateTime @default(now())
+  
+  hifzProgress    HifzProgress[]
+  
+  @@map("quran_surahs")
+}
+
+model HifzProgress {
+  id              String   @id @default(cuid())
+  studentId       String
+  surahId         String
+  startAyah       Int      @default(1)
+  endAyah         Int
+  memorizedAyahs  Int      @default(0)
+  reviewCount     Int      @default(0)
+  lastReviewDate  DateTime?
+  status          String   @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, NEEDS_REVIEW
+  teacherId       String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  student         Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  surah           QuranSurah  @relation(fields: [surahId], references: [id], onDelete: Cascade)
+  teacher         User?       @relation(fields: [teacherId], references: [id])
+  
+  @@unique([studentId, surahId])
+  @@map("hifz_progress")
+}
+
+model IslamicStudyGrade {
+  id              String   @id @default(cuid())
+  studentId       String
+  subjectId       String
+  academicYearId  String
+  term            String
+  quranRecitation Float?   // Score for Quran recitation
+  islamicHistory  Float?   // Score for Islamic history
+  fiqh            Float?   // Score for Islamic jurisprudence
+  hadith          Float?   // Score for Hadith studies
+  akhlaq          Float?   // Score for Islamic ethics
+  overallGrade    String?
+  teacherId       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  student         Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject         Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  academicYear    AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  teacher         User         @relation(fields: [teacherId], references: [id])
+  
+  @@unique([studentId, subjectId, academicYearId, term])
+  @@map("islamic_study_grades")
+}
+
+model PrayerLog {
+  id              String   @id @default(cuid())
+  studentId       String
+  date            DateTime
+  fajr            Boolean  @default(false)
+  dhuhr           Boolean  @default(false)
+  asr             Boolean  @default(false)
+  maghrib         Boolean  @default(false)
+  isha            Boolean  @default(false)
+  totalPrayers    Int      @default(0)
+  notes           String?
+  verifiedBy      String?
+  createdAt       DateTime @default(now())
+  
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  verifier        User?    @relation(fields: [verifiedBy], references: [id])
+  
+  @@unique([studentId, date])
+  @@map("prayer_logs")
+}
+
+// Library Management Models
+model Book {
+  id              String   @id @default(cuid())
+  isbn            String?  @unique
+  title           String
+  author          String
+  publisher       String?
+  publicationYear Int?
+  categoryId      String
+  language        String   @default("Bengali")
+  totalCopies     Int      @default(1)
+  availableCopies Int      @default(1)
+  location        String?  // Shelf location
+  description     String?
+  coverImageUrl   String?
+  price           Float?
+  vendorId        String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  category        BookCategory @relation(fields: [categoryId], references: [id])
+  vendor          Vendor?      @relation(fields: [vendorId], references: [id])
+  issues          BookIssue[]
+  
+  @@map("books")
+}
+
+model BookCategory {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  description     String?
+  parentId        String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  parent          BookCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children        BookCategory[] @relation("CategoryHierarchy")
+  books           Book[]
+  
+  @@map("book_categories")
+}
+
+model BookIssue {
+  id              String    @id @default(cuid())
+  bookId          String
+  studentId       String?
+  staffId         String?
+  issueDate       DateTime  @default(now())
+  dueDate         DateTime
+  returnDate      DateTime?
+  status          String    @default("ISSUED") // ISSUED, RETURNED, OVERDUE, LOST
+  fineAmount      Float     @default(0)
+  finePaid        Boolean   @default(false)
+  notes           String?
+  issuedById      String
+  returnedById    String?
+  
+  book            Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  student         Student?  @relation(fields: [studentId], references: [id])
+  staff           User?     @relation("StaffBookIssues", fields: [staffId], references: [id])
+  issuedBy        User      @relation("IssuedBookIssues", fields: [issuedById], references: [id])
+  returnedBy      User?     @relation("ReturnedBookIssues", fields: [returnedById], references: [id])
+  fines           LibraryFine[]
+  
+  @@map("book_issues")
+}
+
+model LibraryFine {
+  id              String   @id @default(cuid())
+  bookIssueId     String
+  amount          Float
+  reason          String
+  status          String   @default("PENDING") // PENDING, PAID, WAIVED
+  paidDate        DateTime?
+  paidAmount      Float?
+  waivedBy        String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  
+  bookIssue       BookIssue @relation(fields: [bookIssueId], references: [id], onDelete: Cascade)
+  waivedByUser    User?     @relation(fields: [waivedBy], references: [id])
+  
+  @@map("library_fines")
+}
+
+model Vendor {
+  id              String   @id @default(cuid())
+  name            String
+  contactPerson   String?
+  email           String?
+  phone           String?
+  address         String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  books           Book[]
+  
+  @@map("vendors")
+}
+
+// AI Assistant Models
+model AiConversation {
+  id              String   @id @default(cuid())
+  userId          String
+  sessionId       String
+  message         String
+  response        String
+  context         Json?    // Conversation context
+  confidence      Float?
+  responseTime    Int?     // Response time in milliseconds
+  feedback        String?  // User feedback on response
+  createdAt       DateTime @default(now())
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, sessionId])
+  @@map("ai_conversations")
+}
+
+model AiRecommendation {
+  id              String   @id @default(cuid())
+  studentId       String
+  type            String   // STUDY_PLAN, RESOURCE, IMPROVEMENT_AREA
+  title           String
+  description     String
+  priority        String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status          String   @default("ACTIVE") // ACTIVE, DISMISSED, COMPLETED
+  metadata        Json?    // Additional recommendation data
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  @@map("ai_recommendations")
+}
+
+// Gamification Models
+model Achievement {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  category        String   // ACADEMIC, ATTENDANCE, BEHAVIOR, ISLAMIC
+  iconUrl         String?
+  points          Int      @default(0)
+  criteria        Json     // Achievement criteria
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  badges          Badge[]
+  
+  @@map("achievements")
+}
+
+model Badge {
+  id              String   @id @default(cuid())
+  studentId       String
+  achievementId   String
+  earnedDate      DateTime @default(now())
+  points          Int
+  notes           String?
+  
+  student         Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  achievement     Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([studentId, achievementId])
+  @@map("badges")
+}
+
+model Leaderboard {
+  id              String   @id @default(cuid())
+  type            String   // WEEKLY, MONTHLY, YEARLY, ALL_TIME
+  category        String   // OVERALL, SUBJECT_SPECIFIC, ISLAMIC_STUDIES
+  classLevelId    String?
+  sectionId       String?
+  startDate       DateTime
+  endDate         DateTime
+  rankings        Json     // Stored rankings data
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  classLevel      ClassLevel? @relation(fields: [classLevelId], references: [id])
+  section         Section?    @relation(fields: [sectionId], references: [id])
+  
+  @@map("leaderboards")
+}
+
+// Note: The following extensions would be added to existing models in the main schema.prisma
+// These are the additional relationships that need to be added:
+
+/*
+// Add to existing Student model:
+model Student {
+  // ... existing fields ...
+  omrScans        OmrScan[]
+  hifzProgress    HifzProgress[]
+  islamicGrades   IslamicStudyGrade[]
+  prayerLogs      PrayerLog[]
+  bookIssues      BookIssue[]
+  aiRecommendations AiRecommendation[]
+  badges          Badge[]
+}
+
+// Add to existing User model:
+model User {
+  // ... existing fields ...
+  omrTemplates    OmrTemplate[]
+  hifzSupervision HifzProgress[]
+  islamicGrading  IslamicStudyGrade[]
+  prayerVerification PrayerLog[]
+  staffBookIssues BookIssue[] @relation("StaffBookIssues")
+  issuedBooks     BookIssue[] @relation("IssuedBookIssues")
+  returnedBooks   BookIssue[] @relation("ReturnedBookIssues")
+  waivedFines     LibraryFine[]
+  aiConversations AiConversation[]
+}
+
+// Add to existing Exam model:
+model Exam {
+  // ... existing fields ...
+  omrTemplates    OmrTemplate[]
+  omrScans        OmrScan[]
+}
+
+// Add to existing Subject model:
+model Subject {
+  // ... existing fields ...
+  islamicGrades   IslamicStudyGrade[]
+}
+
+// Add to existing AcademicYear model:
+model AcademicYear {
+  // ... existing fields ...
+  islamicGrades   IslamicStudyGrade[]
+}
+
+// Add to existing ClassLevel model:
+model ClassLevel {
+  // ... existing fields ...
+  leaderboards    Leaderboard[]
+}
+
+// Add to existing Section model:
+model Section {
+  // ... existing fields ...
+  leaderboards    Leaderboard[]
+}
+*/

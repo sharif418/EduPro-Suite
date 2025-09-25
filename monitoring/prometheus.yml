@@ -1,0 +1,101 @@
+# =============================================================================
+# Prometheus Configuration for EduPro Suite
+# =============================================================================
+# This configuration sets up monitoring for the EduPro Suite application
+# including metrics collection from various services
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'edupro-suite'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # EduPro Suite Application Metrics
+  - job_name: 'edupro-app'
+    scrape_interval: 30s
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['app:3000']
+    scrape_timeout: 10s
+    honor_labels: true
+
+  # EduPro Suite Health Check
+  - job_name: 'edupro-health'
+    scrape_interval: 15s
+    metrics_path: '/api/health/detailed'
+    static_configs:
+      - targets: ['app:3000']
+    scrape_timeout: 5s
+
+  # PostgreSQL Database Metrics (requires postgres_exporter)
+  # - job_name: 'postgres'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  #   metrics_path: '/metrics'
+  #   scrape_timeout: 10s
+
+  # Redis Cache Metrics (requires redis_exporter)
+  # - job_name: 'redis'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+  #   metrics_path: '/metrics'
+  #   scrape_timeout: 10s
+
+  # Nginx Reverse Proxy Metrics
+  - job_name: 'nginx'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: '/nginx_status'
+    scrape_timeout: 10s
+
+  # Node Exporter for System Metrics (requires node_exporter)
+  # - job_name: 'node-exporter'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+  #   scrape_timeout: 10s
+
+  # Docker Container Metrics (requires cAdvisor)
+  # - job_name: 'cadvisor'
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
+  #   scrape_timeout: 10s
+
+# Remote write configuration (for external storage)
+# remote_write:
+#   - url: "https://your-remote-storage/api/v1/write"
+#     basic_auth:
+#       username: "username"
+#       password: "password"
+
+# Remote read configuration (for external storage)
+# remote_read:
+#   - url: "https://your-remote-storage/api/v1/read"
+#     basic_auth:
+#       username: "username"
+#       password: "password"

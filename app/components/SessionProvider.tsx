@@ -34,8 +34,19 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.user) {
-          setUser(data.user);
+        // Handle both response formats for compatibility
+        if (data.success) {
+          // Check for direct user property first (current format)
+          if (data.user) {
+            setUser(data.user);
+          }
+          // Fallback to nested data.user format (legacy format)
+          else if (data.data && data.data.user) {
+            setUser(data.data.user);
+          }
+          else {
+            setUser(null);
+          }
         } else {
           setUser(null);
         }

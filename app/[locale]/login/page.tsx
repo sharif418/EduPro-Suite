@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string || 'en';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +29,22 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to dashboard or home page
-        router.push('/');
+        // Check user role and redirect appropriately
+        const userRole = data.user?.role;
+        
+        if (userRole === 'SUPERADMIN' || userRole === 'ADMIN') {
+          // Redirect to admin dashboard
+          router.push(`/${locale}/admin`);
+        } else if (userRole === 'TEACHER') {
+          // Redirect to teacher dashboard
+          router.push(`/${locale}/teacher`);
+        } else if (userRole === 'STUDENT') {
+          // Redirect to student dashboard
+          router.push(`/${locale}`);
+        } else {
+          // Default redirect for other roles
+          router.push(`/${locale}`);
+        }
       } else {
         setError(data.error || 'Login failed');
       }

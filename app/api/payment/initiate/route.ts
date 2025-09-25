@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/app/lib/prisma';
 import { verifyAuth, createUnauthorizedResponse, createErrorResponse, createSuccessResponse } from '@/app/lib/auth-helpers';
 
-const prisma = new PrismaClient();
 
 // POST - Initiate payment for an invoice (for students/guardians)
 export async function POST(request: NextRequest) {

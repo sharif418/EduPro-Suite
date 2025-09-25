@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface SidebarProps {
   className?: string;
@@ -11,48 +12,50 @@ interface SidebarProps {
 
 export default function Sidebar({ className = '', isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations('sidebar');
 
   const navigationItems = [
     {
-      name: 'Dashboard',
-      href: '/admin',
+      name: t('dashboard'),
+      href: `/${locale}/admin`,
       icon: '🏠', // Home icon
     },
     {
-      name: 'Academic Setup',
-      href: '/admin/academic-setup',
+      name: t('academicSetup'),
+      href: `/${locale}/admin/academic-setup`,
       icon: '📚', // Book icon
     },
     {
-      name: 'Student Management',
-      href: '/admin/student-management',
+      name: t('studentManagement'),
+      href: `/${locale}/admin/student-management`,
       icon: '👥', // Users icon
     },
     {
-      name: 'Staff Management',
-      href: '/admin/staff-management',
+      name: t('staffManagement'),
+      href: `/${locale}/admin/staff-management`,
       icon: '💼', // Briefcase icon
     },
     {
-      name: 'Leave Management',
-      href: '/admin/leave-management',
+      name: t('leaveManagement'),
+      href: `/${locale}/admin/leave-management`,
       icon: '📋', // Calendar icon
     },
     {
-      name: 'Examinations',
-      href: '/admin/examinations',
+      name: t('examinations'),
+      href: `/${locale}/admin/examinations`,
       icon: '📋', // Clipboard icon
     },
     {
-      name: 'Finance',
-      href: '/admin/finance',
+      name: t('finance'),
+      href: `/${locale}/admin/finance`,
       icon: '💰', // Dollar sign icon
     },
   ];
 
   const isActive = (href: string) => {
-    if (href === '/admin') {
-      return pathname === '/admin';
+    if (href === `/${locale}/admin`) {
+      return pathname === `/${locale}/admin`;
     }
     return pathname.startsWith(href);
   };
@@ -101,7 +104,7 @@ export default function Sidebar({ className = '', isOpen = true, onClose }: Side
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg sm:text-xl font-bold">EduPro Suite</h1>
-                <p className="text-xs sm:text-sm opacity-80">Admin Panel</p>
+                <p className="text-xs sm:text-sm opacity-80">{t('adminPanel')}</p>
               </div>
             </div>
 
@@ -190,7 +193,7 @@ export default function Sidebar({ className = '', isOpen = true, onClose }: Side
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full"></div>
               </div>
             </div>
-            <p className="text-xs sm:text-sm">Admin Dashboard</p>
+            <p className="text-xs sm:text-sm">{t('adminPanel')}</p>
           </div>
         </div>
       </div>

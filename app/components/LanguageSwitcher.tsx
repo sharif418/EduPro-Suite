@@ -21,13 +21,17 @@ export default function LanguageSwitcher() {
   const handleLanguageChange = (langCode: string) => {
     setIsOpen(false);
     
+    // Set the NEXT_LOCALE cookie to ensure persistence
+    document.cookie = `NEXT_LOCALE=${langCode}; path=/; max-age=31536000; SameSite=Lax`;
+    
     // Extract the current path without locale
     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '') || '/';
     
     // Create new path with selected locale (always include locale prefix)
     const newPath = `/${langCode}${pathWithoutLocale === '/' ? '' : pathWithoutLocale}`;
     
-    router.push(newPath);
+    // Force a hard navigation to ensure proper locale switching
+    window.location.href = newPath;
   };
 
   return (

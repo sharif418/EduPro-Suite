@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/app/lib/prisma';
 import { createErrorResponse, createSuccessResponse } from '@/app/lib/auth-helpers';
 
-const prisma = new PrismaClient();
 
 // GET - Fetch result for report card (public access)
 export async function GET(

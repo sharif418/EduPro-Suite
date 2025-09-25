@@ -19,6 +19,8 @@ enum Role {
   TEACHER
   STUDENT
   GUARDIAN
+  ACCOUNTANT
+  LIBRARIAN
 }
 
 enum Gender {
@@ -65,6 +67,8 @@ model User {
 
   // Relations
   staff                    Staff?
+  accountantProfile        Accountant?
+  librarianProfile         Librarian?
   notifications            Notification[]
   notificationPreferences  NotificationPreference[]
   pushSubscriptions        PushSubscription[]
@@ -97,11 +101,17 @@ model ClassLevel {
   updatedAt DateTime @updatedAt
 
   // Relations
-  sections        Section[]
-  classSubjects   ClassSubject[]
-  enrollments     Enrollment[]
-  examSchedules   ExamSchedule[]
-  feeStructures   FeeStructure[]
+  sections                Section[]
+  classSubjects           ClassSubject[]
+  enrollments             Enrollment[]
+  examSchedules           ExamSchedule[]
+  feeStructures           FeeStructure[]
+  classAnnouncements      ClassAnnouncement[]
+  seatingArrangements     SeatingArrangement[]
+  teacherClassAssignments TeacherClassAssignment[]
+  assignments             Assignment[]
+  lessonPlans             LessonPlan[]
+  lessonShares            LessonShare[]
 
   @@map("class_levels")
 }
@@ -115,8 +125,14 @@ model Section {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  classLevel  ClassLevel   @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
-  enrollments Enrollment[]
+  classLevel            ClassLevel             @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  enrollments           Enrollment[]
+  classAnnouncements    ClassAnnouncement[]
+  seatingArrangements   SeatingArrangement[]
+  teacherClassAssignments TeacherClassAssignment[]
+  assignments           Assignment[]
+  lessonPlans           LessonPlan[]
+  lessonShares          LessonShare[]
 
   @@unique([name, classLevelId]) // Unique section name per class
   @@map("sections")
@@ -131,8 +147,12 @@ model Subject {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  classSubjects ClassSubject[]
-  examSchedules ExamSchedule[]
+  classSubjects           ClassSubject[]
+  examSchedules           ExamSchedule[]
+  teacherClassAssignments TeacherClassAssignment[]
+  assignments             Assignment[]
+  lessonPlans             LessonPlan[]
+  lessonTemplates         LessonTemplate[]
 
   @@map("subjects")
 }
@@ -207,6 +227,9 @@ model Student {
   address          StudentAddress  @relation(fields: [addressId], references: [id], onDelete: Cascade)
   enrollments      Enrollment[]
   invoices         Invoice[]
+  lessonShares     LessonShare[]
+  bookIssues       BookIssue[]
+  libraryFines     LibraryFine[]
 
   @@map("students")
 }
@@ -223,12 +246,14 @@ model Enrollment {
   updatedAt      DateTime @updatedAt
 
   // Relations
-  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  classLevel   ClassLevel   @relation(fields: [classLevelId], references: [id], onDelete: Restrict)
-  section      Section      @relation(fields: [sectionId], references: [id], onDelete: Restrict)
-  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  marks        Marks[]
-  results      Result[]
+  student            Student             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classLevel         ClassLevel          @relation(fields: [classLevelId], references: [id], onDelete: Restrict)
+  section            Section             @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  academicYear       AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  marks              Marks[]
+  results            Result[]
+  studentAttendances StudentAttendance[]
+  assignmentSubmissions AssignmentSubmission[]
 
   @@unique([studentId, academicYearId]) // One enrollment per student per academic year
   @@unique([sectionId, academicYearId, rollNumber]) // Unique roll number per section per year
@@ -268,10 +293,21 @@ model Staff {
   updatedAt       DateTime @updatedAt
 
   // Relations
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  address         StaffAddress   @relation(fields: [addressId], references: [id], onDelete: Cascade)
-  attendances     StaffAttendance[]
-  leaveRequests   LeaveRequest[]
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address                 StaffAddress             @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  attendances             StaffAttendance[]
+  leaveRequests           LeaveRequest[]
+  studentAttendances      StudentAttendance[]
+  classAnnouncements      ClassAnnouncement[]
+  seatingArrangements     SeatingArrangement[]
+  teacherClassAssignments TeacherClassAssignment[]
+  assignments             Assignment[]
+  assignmentSubmissions   AssignmentSubmission[]
+  assignmentFiles         AssignmentFile[]
+  lessonPlans             LessonPlan[]
+  lessonTemplates         LessonTemplate[]
+  lessonResources         LessonResource[]
+  lessonShares            LessonShare[]
 
   @@map("staff")
 }
@@ -544,6 +580,96 @@ model Expense {
 }
 
 // ============================================================================
+// CLASS MANAGEMENT MODELS
+// ============================================================================
+
+// Student Attendance model - tracks daily attendance for students
+model StudentAttendance {
+  id           String           @id @default(cuid())
+  enrollmentId String           // Links to student enrollment
+  date         DateTime         @db.Date
+  status       AttendanceStatus
+  markedBy     String           // Staff ID who marked attendance
+  remarks      String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relations
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  markedByStaff Staff   @relation(fields: [markedBy], references: [id], onDelete: Restrict)
+
+  @@unique([enrollmentId, date]) // One attendance record per student per day
+  @@map("student_attendances")
+}
+
+// Class Announcement model - for class-specific announcements
+model ClassAnnouncement {
+  id           String    @id @default(cuid())
+  title        String
+  content      String    @db.Text
+  classLevelId String
+  sectionId    String?   // Optional: specific section or all sections in class
+  authorId     String    // Staff ID who created the announcement
+  isPinned     Boolean   @default(false)
+  attachments  Json?     // Array of file attachments
+  publishedAt  DateTime  @default(now())
+  expiresAt    DateTime? // Optional expiration date
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  section    Section?   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  author     Staff      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@map("class_announcements")
+}
+
+// Seating Arrangement model - stores classroom seating layouts
+model SeatingArrangement {
+  id           String   @id @default(cuid())
+  name         String   // e.g., "Default Layout", "Exam Layout"
+  classLevelId String
+  sectionId    String
+  layout       Json     // Stores the seating layout data
+  rows         Int      // Number of rows
+  columns      Int      // Number of columns
+  createdBy    String   // Staff ID who created the layout
+  isActive     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  section    Section    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  creator    Staff      @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@unique([classLevelId, sectionId, name]) // Unique layout name per class-section
+  @@map("seating_arrangements")
+}
+
+// Teacher Class Assignment model - links teachers to classes they teach
+model TeacherClassAssignment {
+  id           String   @id @default(cuid())
+  teacherId    String   // Staff ID of the teacher
+  classLevelId String
+  sectionId    String
+  subjectId    String   // Subject they teach to this class
+  isClassTeacher Boolean @default(false) // Is this teacher the class teacher?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  teacher    Staff      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classLevel ClassLevel @relation(fields: [classLevelId], references: [id], onDelete: Cascade)
+  section    Section    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, classLevelId, sectionId, subjectId]) // One assignment per teacher-class-subject
+  @@map("teacher_class_assignments")
+}
+
+// ============================================================================
 // NOTIFICATION SYSTEM MODELS
 // ============================================================================
 
@@ -627,6 +753,173 @@ model Notification {
   @@map("notifications")
 }
 
+// New models for Accountant and Librarian profiles
+model Accountant {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  employeeId        String   @unique
+  department        String?
+  specialization    String?
+  experience        Int?
+  qualifications    String?
+  salary            Decimal?
+  joiningDate       DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accountants")
+}
+
+model Librarian {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  employeeId        String   @unique
+  department        String?
+  specialization    String?
+  experience        Int?
+  qualifications    String?
+  salary            Decimal?
+  joiningDate       DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookIssues        BookIssue[]
+  bookReturns       BookReturn[]
+
+  @@map("librarians")
+}
+
+// Library Management Models
+model BookCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  books       Book[]
+
+  @@map("book_categories")
+}
+
+model Book {
+  id            String      @id @default(cuid())
+  isbn          String?     @unique
+  title         String
+  author        String
+  publisher     String?
+  publishedYear Int?
+  edition       String?
+  pages         Int?
+  language      String?
+  categoryId    String
+  totalCopies   Int         @default(1)
+  availableCopies Int       @default(1)
+  location      String?
+  description   String?
+  coverImage    String?
+  price         Decimal?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  category      BookCategory @relation(fields: [categoryId], references: [id])
+  issues        BookIssue[]
+  returns       BookReturn[]
+
+  @@map("books")
+}
+
+model BookIssue {
+  id          String    @id @default(cuid())
+  bookId      String
+  studentId   String
+  librarianId String
+  issueDate   DateTime  @default(now())
+  dueDate     DateTime
+  returnDate  DateTime?
+  status      IssueStatus @default(ISSUED)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  book        Book      @relation(fields: [bookId], references: [id])
+  student     Student   @relation(fields: [studentId], references: [id])
+  librarian   Librarian @relation(fields: [librarianId], references: [id])
+  returns     BookReturn[]
+  fines       LibraryFine[]
+
+  @@map("book_issues")
+}
+
+model BookReturn {
+  id          String    @id @default(cuid())
+  bookIssueId String
+  bookId      String
+  librarianId String
+  returnDate  DateTime  @default(now())
+  condition   BookCondition @default(GOOD)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  bookIssue   BookIssue @relation(fields: [bookIssueId], references: [id])
+  book        Book      @relation(fields: [bookId], references: [id])
+  librarian   Librarian @relation(fields: [librarianId], references: [id])
+
+  @@map("book_returns")
+}
+
+model LibraryFine {
+  id          String    @id @default(cuid())
+  bookIssueId String
+  studentId   String
+  amount      Decimal
+  reason      String
+  status      FineStatus @default(PENDING)
+  dueDate     DateTime
+  paidDate    DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  bookIssue   BookIssue @relation(fields: [bookIssueId], references: [id])
+  student     Student   @relation(fields: [studentId], references: [id])
+
+  @@map("library_fines")
+}
+
+// New enums for library management
+enum IssueStatus {
+  ISSUED
+  RETURNED
+  OVERDUE
+  LOST
+}
+
+enum BookCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  DAMAGED
+}
+
+enum FineStatus {
+  PENDING
+  PAID
+  WAIVED
+}
+
 // Notification Delivery model - tracks delivery attempts across channels
 model NotificationDelivery {
   id             String            @id @default(cuid())
@@ -700,4 +993,225 @@ model NotificationQueue {
 
   @@index([priority, scheduledAt])
   @@map("notification_queue")
+}
+
+// ============================================================================
+// ASSIGNMENT MANAGEMENT MODELS
+// ============================================================================
+
+model Assignment {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?  @db.Text
+  instructions String?  @db.Text
+  classLevelId String
+  sectionId    String
+  subjectId    String
+  teacherId    String
+  dueDate      DateTime
+  attachments  Json?    // Array of file URLs and metadata
+  maxMarks     Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  classLevel  ClassLevel @relation(fields: [classLevelId], references: [id])
+  section     Section    @relation(fields: [sectionId], references: [id])
+  subject     Subject    @relation(fields: [subjectId], references: [id])
+  teacher     Staff      @relation(fields: [teacherId], references: [id])
+  submissions AssignmentSubmission[]
+  files       AssignmentFile[]
+
+  // Indexes for performance
+  @@index([dueDate])
+  @@index([teacherId])
+  @@index([classLevelId, sectionId])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id             String    @id @default(cuid())
+  assignmentId   String
+  enrollmentId   String
+  submissionDate DateTime?
+  fileUrls       Json?     // Array of submitted file URLs
+  status         String    @default("PENDING") // PENDING, SUBMITTED, GRADED
+  marksObtained  Int?
+  feedback       String?   @db.Text
+  gradedAt       DateTime?
+  gradedBy       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+  grader     Staff?     @relation(fields: [gradedBy], references: [id])
+
+  // Unique constraint to prevent duplicate submissions
+  @@unique([assignmentId, enrollmentId])
+  @@index([status])
+  @@index([submissionDate])
+  @@map("assignment_submissions")
+}
+
+model AssignmentFile {
+  id           String   @id @default(cuid())
+  assignmentId String?
+  submissionId String?
+  fileName     String
+  fileUrl      String
+  fileSize     Int
+  fileType     String
+  uploadedBy   String
+  createdAt    DateTime @default(now())
+
+  // Relations
+  assignment Assignment?          @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  uploader   Staff               @relation(fields: [uploadedBy], references: [id])
+
+  @@index([assignmentId])
+  @@index([uploadedBy])
+  @@map("assignment_files")
+}
+
+// ============================================================================
+// LESSON PLANNING MODELS
+// ============================================================================
+
+model LessonPlan {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  objectives      String[] // Learning objectives
+  activities      String[] // Lesson activities
+  duration        Int      // Duration in minutes
+  lessonDate      DateTime
+  status          LessonStatus @default(DRAFT)
+  assessmentMethods String[] // Assessment methods
+  notes           String?
+  classLevelId    String
+  sectionId       String
+  subjectId       String
+  teacherId       String
+  templateId      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  classLevel      ClassLevel @relation(fields: [classLevelId], references: [id])
+  section         Section    @relation(fields: [sectionId], references: [id])
+  subject         Subject    @relation(fields: [subjectId], references: [id])
+  teacher         Staff      @relation(fields: [teacherId], references: [id])
+  template        LessonTemplate? @relation(fields: [templateId], references: [id])
+  resources       LessonResource[]
+  shares          LessonShare[]
+
+  @@index([lessonDate])
+  @@index([teacherId])
+  @@index([classLevelId, sectionId])
+  @@map("lesson_plans")
+}
+
+model LessonTemplate {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  objectives      String[] // Learning objectives template
+  activities      String[] // Activities template
+  duration        Int      // Default duration in minutes
+  assessmentMethods String[] // Assessment methods template
+  category        String?  // Template category
+  isPublic        Boolean  @default(false) // Can be shared between teachers
+  usageCount      Int      @default(0) // Track template usage
+  subjectId       String
+  createdById     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  subject         Subject  @relation(fields: [subjectId], references: [id])
+  createdBy       Staff    @relation(fields: [createdById], references: [id])
+  lessonPlans     LessonPlan[]
+
+  @@index([subjectId])
+  @@index([createdById])
+  @@map("lesson_templates")
+}
+
+model LessonResource {
+  id           String     @id @default(cuid())
+  fileName     String
+  fileUrl      String
+  fileType     String
+  fileSize     Int
+  resourceType ResourceType @default(DOCUMENT)
+  description  String?
+  lessonPlanId String
+  uploadedById String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  lessonPlan   LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+  uploadedBy   Staff      @relation(fields: [uploadedById], references: [id])
+
+  @@index([lessonPlanId])
+  @@index([uploadedById])
+  @@map("lesson_resources")
+}
+
+model LessonShare {
+  id           String     @id @default(cuid())
+  lessonPlanId String
+  sharedWith   ShareTarget @default(CLASS)
+  classLevelId String?
+  sectionId    String?
+  studentId    String?
+  permissions  SharePermission @default(VIEW_ONLY)
+  accessCount  Int        @default(0)
+  lastAccessed DateTime?
+  isActive     Boolean    @default(true)
+  sharedById   String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  lessonPlan   LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+  classLevel   ClassLevel? @relation(fields: [classLevelId], references: [id])
+  section      Section?   @relation(fields: [sectionId], references: [id])
+  student      Student?   @relation(fields: [studentId], references: [id])
+  sharedBy     Staff      @relation(fields: [sharedById], references: [id])
+
+  @@index([lessonPlanId])
+  @@index([sharedById])
+  @@map("lesson_shares")
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ResourceType {
+  DOCUMENT
+  IMAGE
+  VIDEO
+  AUDIO
+  PRESENTATION
+  WORKSHEET
+  OTHER
+}
+
+enum ShareTarget {
+  CLASS
+  SECTION
+  INDIVIDUAL
+}
+
+enum SharePermission {
+  VIEW_ONLY
+  DOWNLOAD
+  INTERACTIVE
 }

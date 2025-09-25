@@ -1,9 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { verifyAdminAuth, createUnauthorizedResponse, createErrorResponse, createSuccessResponse } from '@/app/lib/auth-helpers';
+import { NextRequest } from 'next/server';
+import { prisma } from '@/app/lib/prisma';
+import { verifyAdminAuth } from '@/app/lib/auth-helpers';
+import { emailService } from '@/app/lib/email-service';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  handlePrismaError,
+  logApiError,
+  addSecurityHeaders,
+  checkRateLimit,
+  getClientIP
+} from '@/app/lib/api-helpers';
 
-const prisma = new PrismaClient();
 
 // Helper function to generate unique staff ID
 async function generateStaffId(): Promise<string> {
@@ -36,7 +46,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await verifyAdminAuth(request);
     if (!user) {
-      return createUnauthorizedResponse();
+      return createErrorResponse('Unauthorized', 401, 'AUTH_REQUIRED');
     }
 
     const { searchParams } = new URL(request.url);
@@ -136,8 +146,23 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[STAFF_GET_ERROR]', error);
-    return createErrorResponse('Failed to fetch staff');
+    // Handle Prisma-specific errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      return handlePrismaError(error);
+    }
+
+    // Log the error for monitoring
+    logApiError(error as Error, {
+      path: '/api/admin/staff',
+      userRole: 'ADMIN'
+    });
+
+    return createErrorResponse(
+      'Failed to fetch staff',
+      500,
+      'STAFF_FETCH_ERROR',
+      process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+    );
   }
 }
 
@@ -146,7 +171,23 @@ export async function POST(request: NextRequest) {
   try {
     const user = await verifyAdminAuth(request);
     if (!user) {
-      return createUnauthorizedResponse();
+      return createErrorResponse('Unauthorized', 401, 'AUTH_REQUIRED');
+    }
+
+    // Rate limiting check
+    const rateLimitResult = checkRateLimit(request, {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxRequests: 10, // 10 staff creation attempts per IP per 15 minutes
+      keyGenerator: (req) => `staff-create:${getClientIP(req)}`
+    });
+
+    if (!rateLimitResult.allowed) {
+      return createErrorResponse(
+        'Too many staff creation attempts. Please try again later.',
+        429,
+        'RATE_LIMIT_EXCEEDED',
+        { resetTime: rateLimitResult.resetTime }
+      );
     }
 
     const body = await request.json();
@@ -166,28 +207,41 @@ export async function POST(request: NextRequest) {
       presentAddress,
       permanentAddress,
       // User account information
-      password = 'staff123', // Default password
+      role = 'TEACHER', // Default role for staff
     } = body;
 
     // Validate required fields
     if (!name || !email || !dateOfBirth || !gender || !contactNumber || !designation || !department || !qualification || !joiningDate || !presentAddress || !permanentAddress) {
-      return createErrorResponse('Missing required fields', 400);
+      return createErrorResponse('Missing required fields', 400, 'VALIDATION_ERROR');
+    }
+
+    // Validate role against allowed roles
+    const allowedRoles = ['TEACHER', 'ACCOUNTANT', 'LIBRARIAN', 'ADMIN'];
+    if (!allowedRoles.includes(role)) {
+      return createErrorResponse(
+        `Invalid role. Allowed roles: ${allowedRoles.join(', ')}`,
+        400,
+        'INVALID_ROLE'
+      );
     }
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase().trim() },
     });
 
     if (existingUser) {
-      return createErrorResponse('Email already exists', 400);
+      return createErrorResponse('Email already exists', 400, 'EMAIL_EXISTS');
     }
 
     // Generate unique staff ID
     const staffId = await generateStaffId();
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // Generate secure temporary password and invitation token
+    const tempPassword = crypto.randomBytes(8).toString('hex');
+    const hashedPassword = await bcrypt.hash(tempPassword, 12);
+    const invitationToken = crypto.randomBytes(32).toString('hex');
+    const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     // Perform database transaction to create all related records
     const result = await prisma.$transaction(async (tx) => {
@@ -195,9 +249,9 @@ export async function POST(request: NextRequest) {
       const newUser = await tx.user.create({
         data: {
           name,
-          email,
+          email: email.toLowerCase().trim(),
           password: hashedPassword,
-          role: 'TEACHER', // Default role for staff
+          role: role as any,
         },
       });
 
@@ -214,7 +268,7 @@ export async function POST(request: NextRequest) {
         data: {
           staffId,
           name,
-          email,
+          email: email.toLowerCase().trim(),
           designation,
           department,
           dateOfBirth: new Date(dateOfBirth),
@@ -227,8 +281,52 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return { staff, user: newUser, address };
+      return { staff, user: newUser, address, tempPassword, invitationToken };
     });
+
+    // Send email invitation
+    let emailSent = false;
+    let emailError = null;
+
+    try {
+      // Create a mock notification object for the email service
+      const mockNotification = {
+        id: `staff-welcome-${Date.now()}`,
+        userId: result.user.id,
+        type: 'SYSTEM',
+        priority: 'HIGH',
+        title: 'Welcome to EduPro Suite - Staff Account Created',
+        content: `Dear ${name},\n\nWelcome to EduPro Suite! Your staff account has been created successfully.\n\nHere are your login credentials:\n\nStaff ID: ${staffId}\nEmail: ${email}\nTemporary Password: ${result.tempPassword}\nRole: ${role}\nDepartment: ${department}\nDesignation: ${designation}\n\nImportant: Please change your password after your first login for security.\n\nYou can access your ${role.toLowerCase()} portal at: ${process.env.NEXT_PUBLIC_APP_URL}/en/${role.toLowerCase()}\n\nIf you have any questions, please contact the system administrator.\n\nBest regards,\nEduPro Suite Team`,
+        createdAt: new Date().toISOString(),
+        user: {
+          id: result.user.id,
+          email: email,
+          name: name,
+        },
+        data: {
+          actionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/en/${role.toLowerCase()}`,
+          staffId,
+          tempPassword: result.tempPassword,
+          role,
+          department,
+          designation,
+        }
+      };
+
+      const emailResult = await emailService.sendNotification(mockNotification);
+      
+      if (emailResult.success) {
+        emailSent = true;
+        console.log(`[STAFF_CREATION] Email invitation sent to ${email}`);
+      } else {
+        emailError = emailResult.error || 'Failed to send email';
+      }
+
+    } catch (error) {
+      console.error('[STAFF_EMAIL_ERROR]', error);
+      emailError = error instanceof Error ? error.message : 'Failed to send email';
+      // Don't fail the entire operation if email fails
+    }
 
     // Fetch the complete staff data to return
     const completeStaff = await prisma.staff.findUnique({
@@ -246,12 +344,46 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return createSuccessResponse({ staff: completeStaff }, 201);
+    const responseData = {
+      staff: completeStaff,
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        role: result.user.role,
+      },
+      invitation: {
+        emailSent,
+        emailError,
+        tempPassword: result.tempPassword,
+        invitationToken: result.invitationToken,
+      },
+    };
+
+    const response = createSuccessResponse(responseData, 201, 'Staff member created successfully');
+    return addSecurityHeaders(response);
   } catch (error: unknown) {
-    console.error('[STAFF_POST_ERROR]', error);
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
-      return createErrorResponse('Staff with this email or staff ID already exists', 400);
+    // Handle Prisma-specific errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      return handlePrismaError(error);
     }
-    return createErrorResponse('Failed to create staff member');
+
+    // Log the error for monitoring
+    logApiError(error as Error, {
+      path: '/api/admin/staff',
+      userRole: 'ADMIN'
+    });
+
+    return createErrorResponse(
+      'Failed to create staff member',
+      500,
+      'STAFF_CREATE_ERROR',
+      process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+    );
   }
+}
+
+// OPTIONS - Handle CORS preflight requests
+export async function OPTIONS(request: NextRequest) {
+  const response = createSuccessResponse(null, 200);
+  return addSecurityHeaders(response);
 }

@@ -3,9 +3,12 @@ import { Hind_Siliguri, Almarai } from "next/font/google";
 import "../globals.css";
 import { SessionProvider } from "../components/SessionProvider";
 import { ThemeProvider } from "../components/ThemeProvider";
+import { ToastProvider } from "../contexts/ToastContext";
+import { SettingsProvider } from "../contexts/SettingsContext";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { PageErrorBoundary } from '../components/ErrorBoundary';
 
 // Bengali font
 const hindSiliguri = Hind_Siliguri({
@@ -35,9 +38,9 @@ export default async function LocaleLayout({
   params
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
-  const { locale } = await params;
+  const { locale } = params;
   
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale as any)) notFound();
@@ -67,7 +70,13 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider defaultTheme="system">
             <SessionProvider>
-              {children}
+              <SettingsProvider>
+                <ToastProvider position="top-right" maxToasts={5}>
+                  <PageErrorBoundary>
+                    {children}
+                  </PageErrorBoundary>
+                </ToastProvider>
+              </SettingsProvider>
             </SessionProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

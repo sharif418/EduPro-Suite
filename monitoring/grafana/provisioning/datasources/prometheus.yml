@@ -1,0 +1,87 @@
+# =============================================================================
+# Grafana Datasource Configuration for EduPro Suite
+# =============================================================================
+# This configuration sets up Prometheus as a datasource for Grafana
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  # Prometheus datasource for metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.45.0
+      cacheLevel: 'High'
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
+      queryTimeout: 60s
+      timeInterval: 30s
+    secureJsonData: {}
+
+  # Loki datasource for logs
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: false
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: prometheus
+          matcherRegex: "traceID=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
+    secureJsonData: {}
+
+  # TestData datasource for testing
+  - name: TestData
+    type: testdata
+    access: proxy
+    isDefault: false
+    editable: true
+    jsonData: {}
+    secureJsonData: {}
+
+# Notification channels (optional)
+notifiers:
+  - name: email-notifications
+    type: email
+    uid: email001
+    org_id: 1
+    is_default: true
+    send_reminder: true
+    disable_resolve_message: false
+    frequency: 10m
+    settings:
+      addresses: admin@abrar.ailearnersbd.com
+      subject: "[Grafana] EduPro Suite Alert"
+      single_email: false
+
+  - name: slack-notifications
+    type: slack
+    uid: slack001
+    org_id: 1
+    is_default: false
+    send_reminder: true
+    disable_resolve_message: false
+    frequency: 10m
+    settings:
+      url: https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+      channel: "#alerts"
+      username: "Grafana"
+      title: "EduPro Suite Alert"
+      text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+
+# Delete datasources (optional)
+deleteDatasources:
+  - name: old-prometheus
+    orgId: 1

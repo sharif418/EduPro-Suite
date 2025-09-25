@@ -1,8 +1,12 @@
+// Helper to resolve User.id by email (returns null if not found)
+export async function resolveUserIdByEmail(email: string | null | undefined): Promise<string | null> {
+  if (!email) return null;
+  const user = await prisma.user.findUnique({ where: { email } });
+  return user ? user.id : null;
+}
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
 
 export interface AuthUser {
   userId: string;
@@ -90,9 +94,84 @@ export function createErrorResponse(message: string, status: number = 500) {
   );
 }
 
+export async function verifyTeacherAuth(request: NextRequest): Promise<AuthUser | null> {
+  const user = await verifyAuth(request);
+  
+  if (!user) {
+    return null;
+  }
+
+  // Check if user has teacher privileges
+  if (user.role !== 'TEACHER') {
+    return null;
+  }
+
+  return user;
+}
+
 export function createSuccessResponse(data: any, status: number = 200) {
   return NextResponse.json(
     { success: true, ...data },
     { status }
   );
+}
+
+export async function verifyGuardianAuth(request: NextRequest): Promise<AuthUser | null> {
+  const user = await verifyAuth(request);
+  
+  if (!user) {
+    return null;
+  }
+
+  // Check if user has guardian privileges
+  if (user.role !== 'GUARDIAN') {
+    return null;
+  }
+
+  return user;
+}
+
+export async function verifyAccountantAuth(request: NextRequest): Promise<AuthUser | null> {
+  const user = await verifyAuth(request);
+  
+  if (!user) {
+    return null;
+  }
+
+  // Check if user has accountant privileges
+  if (user.role !== 'ACCOUNTANT') {
+    return null;
+  }
+
+  return user;
+}
+
+export async function verifyLibrarianAuth(request: NextRequest): Promise<AuthUser | null> {
+  const user = await verifyAuth(request);
+  
+  if (!user) {
+    return null;
+  }
+
+  // Check if user has librarian privileges
+  if (user.role !== 'LIBRARIAN') {
+    return null;
+  }
+
+  return user;
+}
+
+export async function verifyStudentAuth(request: NextRequest): Promise<AuthUser | null> {
+  const user = await verifyAuth(request);
+  
+  if (!user) {
+    return null;
+  }
+
+  // Check if user has student privileges
+  if (user.role !== 'STUDENT') {
+    return null;
+  }
+
+  return user;
 }

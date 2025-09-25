@@ -1,0 +1,777 @@
+openapi: 3.0.3
+info:
+  title: EduPro Suite API
+  description: Comprehensive Educational Management System API for Bangladesh
+  version: 1.0.0
+  contact:
+    name: EduPro Suite Development Team
+    email: support@edupro-suite.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://edupro-suite.com/api
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [SUPERADMIN, ADMIN, TEACHER, STUDENT, GUARDIAN, LIBRARIAN, ACCOUNTANT]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+        bloodGroup:
+          type: string
+        religion:
+          type: string
+        nationality:
+          type: string
+        profileImageUrl:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        qualification:
+          type: string
+        experience:
+          type: integer
+        salary:
+          type: number
+        joiningDate:
+          type: string
+          format: date
+        isActive:
+          type: boolean
+
+    Class:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        level:
+          type: integer
+        section:
+          type: string
+        capacity:
+          type: integer
+        classTeacherId:
+          type: string
+          format: uuid
+
+    Subject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+
+    Exam:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [MIDTERM, FINAL, QUIZ, ASSIGNMENT]
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        fullMarks:
+          type: number
+        passMarks:
+          type: number
+
+    OMRTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        examId:
+          type: string
+          format: uuid
+        totalQuestions:
+          type: integer
+        questionsPerPage:
+          type: integer
+        answerKeyType:
+          type: string
+          enum: [ABCD, ABCDE, TRUE_FALSE, NUMERIC]
+        templateData:
+          type: object
+        isActive:
+          type: boolean
+
+    HifzProgress:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        surahId:
+          type: string
+          format: uuid
+        startAyah:
+          type: integer
+        endAyah:
+          type: integer
+        memorizedAyahs:
+          type: integer
+        status:
+          type: string
+          enum: [IN_PROGRESS, COMPLETED, NEEDS_REVIEW]
+        teacherId:
+          type: string
+          format: uuid
+        notes:
+          type: string
+
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+        error:
+          type: string
+
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items: {}
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+        '400':
+          description: Validation error
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate user session
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Get authenticated user information
+      responses:
+        '200':
+          description: User information retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
+  # Student Management
+  /admin/students:
+    get:
+      tags:
+        - Student Management
+      summary: Get all students
+      description: Retrieve paginated list of students
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: classId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Students retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+    post:
+      tags:
+        - Student Management
+      summary: Create new student
+      description: Add a new student to the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+      responses:
+        '201':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Student'
+        '400':
+          description: Validation error
+        '403':
+          description: Access denied
+
+  /admin/students/{id}:
+    get:
+      tags:
+        - Student Management
+      summary: Get student by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Student'
+        '404':
+          description: Student not found
+
+    put:
+      tags:
+        - Student Management
+      summary: Update student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+      responses:
+        '200':
+          description: Student updated successfully
+        '404':
+          description: Student not found
+
+    delete:
+      tags:
+        - Student Management
+      summary: Delete student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student deleted successfully
+        '404':
+          description: Student not found
+
+  # Teacher Dashboard
+  /teacher/dashboard/stats:
+    get:
+      tags:
+        - Teacher Dashboard
+      summary: Get teacher dashboard statistics
+      description: Retrieve teacher-specific dashboard data
+      responses:
+        '200':
+          description: Dashboard statistics retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  statistics:
+                    type: object
+                    properties:
+                      totalClasses:
+                        type: integer
+                      totalStudents:
+                        type: integer
+                      pendingTasks:
+                        type: integer
+                      todayClasses:
+                        type: integer
+                  todaySchedule:
+                    type: array
+                    items:
+                      type: object
+                  recentActivities:
+                    type: array
+                    items:
+                      type: object
+                  pendingTasks:
+                    type: array
+                    items:
+                      type: object
+
+  # OMR Management
+  /admin/omr/templates:
+    get:
+      tags:
+        - OMR Management
+      summary: Get OMR templates
+      parameters:
+        - name: examId
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OMR templates retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OMRTemplate'
+
+    post:
+      tags:
+        - OMR Management
+      summary: Create OMR template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OMRTemplate'
+      responses:
+        '201':
+          description: OMR template created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/OMRTemplate'
+
+  # Islamic Education
+  /islamic-education/hifz-progress:
+    get:
+      tags:
+        - Islamic Education
+      summary: Get Hifz progress
+      parameters:
+        - name: studentId
+          in: query
+          schema:
+            type: string
+        - name: surahId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hifz progress retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HifzProgress'
+
+    post:
+      tags:
+        - Islamic Education
+      summary: Create Hifz progress entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HifzProgress'
+      responses:
+        '201':
+          description: Hifz progress created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/HifzProgress'
+
+  # Finance Management
+  /admin/finance/fee-structures:
+    get:
+      tags:
+        - Finance Management
+      summary: Get fee structures
+      responses:
+        '200':
+          description: Fee structures retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+    post:
+      tags:
+        - Finance Management
+      summary: Create fee structure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                classLevelId:
+                  type: string
+                amount:
+                  type: number
+                dueDate:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Fee structure created
+
+  /admin/finance/payments:
+    get:
+      tags:
+        - Finance Management
+      summary: Get payments
+      responses:
+        '200':
+          description: Payments retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+    post:
+      tags:
+        - Finance Management
+      summary: Record payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                amount:
+                  type: number
+                paymentMethod:
+                  type: string
+                  enum: [CASH, CARD, MOBILE_BANKING, BANK_TRANSFER]
+                transactionId:
+                  type: string
+      responses:
+        '201':
+          description: Payment recorded
+
+  # Assignment Management
+  /teacher/assignments:
+    get:
+      tags:
+        - Assignment Management
+      summary: Get teacher assignments
+      responses:
+        '200':
+          description: Assignments retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+    post:
+      tags:
+        - Assignment Management
+      summary: Create assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                classId:
+                  type: string
+                subjectId:
+                  type: string
+                dueDate:
+                  type: string
+                  format: date-time
+                maxMarks:
+                  type: number
+      responses:
+        '201':
+          description: Assignment created
+
+  /student/assignments:
+    get:
+      tags:
+        - Assignment Management
+      summary: Get student assignments
+      responses:
+        '200':
+          description: Student assignments retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+  /student/assignments/{assignmentId}/submit:
+    post:
+      tags:
+        - Assignment Management
+      summary: Submit assignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Assignment submitted
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Student Management
+    description: Student CRUD operations and management
+  - name: Teacher Dashboard
+    description: Teacher-specific dashboard and statistics
+  - name: OMR Management
+    description: Optical Mark Recognition system
+  - name: Islamic Education
+    description: Islamic education tracking and management
+  - name: Finance Management
+    description: Fee and payment management
+  - name: Assignment Management
+    description: Assignment creation and submission

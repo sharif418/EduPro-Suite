@@ -6,6 +6,7 @@ import { Button } from '@/app/components/ui/Button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/app/components/ui/Dialog';
 import { MultiStepForm, FormStep, FormSection } from '@/app/components/ui/MultiStepForm';
 import { useToast } from '@/app/components/ui/Toast';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 
 interface Staff {
@@ -47,6 +48,9 @@ interface StaffResponse {
 }
 
 export default function StaffManagementPage() {
+  const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -226,13 +230,13 @@ export default function StaffManagementPage() {
   const hiringFormSteps = [
     {
       id: 'personal',
-      title: 'Personal Information',
+      title: t('personalInfo'),
       component: (
         <FormStep>
-          <FormSection title="Basic Information">
+          <FormSection title={t('basicInfo')}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('fullName')} *</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -242,7 +246,7 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('emailAddress')} *</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -252,7 +256,7 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('dateOfBirth')} *</label>
                 <input
                   type="date"
                   value={formData.dateOfBirth}
@@ -262,21 +266,21 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('gender')} *</label>
                 <select
                   value={formData.gender}
                   onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">Select Gender</option>
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="OTHER">Other</option>
+                  <option value="">{t('selectGender')}</option>
+                  <option value="MALE">{t('male')}</option>
+                  <option value="FEMALE">{t('female')}</option>
+                  <option value="OTHER">{t('other')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('contactNumber')} *</label>
                 <input
                   type="tel"
                   value={formData.contactNumber}
@@ -292,13 +296,13 @@ export default function StaffManagementPage() {
     },
     {
       id: 'professional',
-      title: 'Professional Information',
+      title: t('professionalInfo'),
       component: (
         <FormStep>
-          <FormSection title="Job Details">
+          <FormSection title={t('jobDetails')}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Designation *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('designation')} *</label>
                 <input
                   type="text"
                   value={formData.designation}
@@ -309,7 +313,7 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('department')} *</label>
                 <input
                   type="text"
                   value={formData.department}
@@ -320,7 +324,7 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Qualification *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('qualification')} *</label>
                 <input
                   type="text"
                   value={formData.qualification}
@@ -331,7 +335,7 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Joining Date *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('joiningDate')} *</label>
                 <input
                   type="date"
                   value={formData.joiningDate}
@@ -347,13 +351,13 @@ export default function StaffManagementPage() {
     },
     {
       id: 'contact',
-      title: 'Contact Information',
+      title: t('contactInfo'),
       component: (
         <FormStep>
-          <FormSection title="Address Details">
+          <FormSection title={t('addressDetails')}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Present Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('presentAddress')} *</label>
                 <textarea
                   value={formData.presentAddress}
                   onChange={(e) => setFormData({ ...formData, presentAddress: e.target.value })}
@@ -363,7 +367,7 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Permanent Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('permanentAddress')} *</label>
                 <textarea
                   value={formData.permanentAddress}
                   onChange={(e) => setFormData({ ...formData, permanentAddress: e.target.value })}
@@ -383,33 +387,33 @@ export default function StaffManagementPage() {
   const columns = [
     {
       key: 'staffId',
-      header: 'Staff ID',
+      header: t('staffId'),
       render: (row: Staff) => (
         <Link 
-          href={`/admin/staff-management/${row.staffId}`}
+          href={`/${locale}/admin/staff-management/${row.staffId}`}
           className="text-blue-600 hover:text-blue-800 font-medium"
         >
           {row.staffId}
         </Link>
       ),
     },
-    { key: 'name', header: 'Name' },
-    { key: 'designation', header: 'Designation' },
-    { key: 'department', header: 'Department' },
-    { key: 'contactNumber', header: 'Contact' },
+    { key: 'name', header: tCommon('name') || 'Name' },
+    { key: 'designation', header: t('designation') },
+    { key: 'department', header: t('department') },
+    { key: 'contactNumber', header: t('contactNumber') },
     {
       key: 'joiningDate',
-      header: 'Joining Date',
+      header: t('joiningDate'),
       render: (row: Staff) => new Date(row.joiningDate).toLocaleDateString(),
     },
     {
       key: '_count.attendances',
-      header: 'Attendance Records',
+      header: t('attendanceRecords'),
       render: (row: Staff) => row._count.attendances,
     },
     {
       key: '_count.leaveRequests',
-      header: 'Leave Requests',
+      header: t('leaveRequests'),
       render: (row: Staff) => row._count.leaveRequests,
     },
   ];
@@ -420,7 +424,7 @@ export default function StaffManagementPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Staff Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-gray-600 mt-2">Manage your institution&apos;s staff members and their information</p>
           </div>
           <Button
@@ -430,7 +434,7 @@ export default function StaffManagementPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Hire New Staff
+            {t('addStaff')}
           </Button>
         </div>
 
@@ -444,7 +448,7 @@ export default function StaffManagementPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Staff</p>
+                <p className="text-sm font-medium text-gray-600">{t('totalStaff')}</p>
                 <p className="text-2xl font-bold text-gray-900">{pagination.totalCount}</p>
               </div>
             </div>
@@ -457,7 +461,7 @@ export default function StaffManagementPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Departments</p>
+                <p className="text-sm font-medium text-gray-600">{t('departments')}</p>
                 <p className="text-2xl font-bold text-gray-900">{filters.departments.length}</p>
               </div>
             </div>
@@ -470,7 +474,7 @@ export default function StaffManagementPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Designations</p>
+                <p className="text-sm font-medium text-gray-600">{t('designations')}</p>
                 <p className="text-2xl font-bold text-gray-900">{filters.designations.length}</p>
               </div>
             </div>
@@ -483,7 +487,7 @@ export default function StaffManagementPage() {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Today</p>
+                <p className="text-sm font-medium text-gray-600">{t('activeToday')}</p>
                 <p className="text-2xl font-bold text-gray-900">-</p>
               </div>
             </div>
@@ -495,36 +499,36 @@ export default function StaffManagementPage() {
       <div className="bg-white p-4 rounded-lg shadow border mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search Staff</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('searchStaff')}</label>
             <input
               type="text"
-              placeholder="Search by name, staff ID, or email..."
+              placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('department')}</label>
             <select
               value={selectedDepartment}
               onChange={(e) => handleDepartmentFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Departments</option>
+              <option value="">{t('allDepartments')}</option>
               {filters.departments.map((dept) => (
                 <option key={dept} value={dept}>{dept}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('designation')}</label>
             <select
               value={selectedDesignation}
               onChange={(e) => handleDesignationFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Designations</option>
+              <option value="">{t('allDesignations')}</option>
               {filters.designations.map((designation) => (
                 <option key={designation} value={designation}>{designation}</option>
               ))}
@@ -539,7 +543,7 @@ export default function StaffManagementPage() {
           data={staff}
           columns={columns}
           loading={loading}
-          emptyMessage="No staff members found. Click 'Hire New Staff' to add your first staff member."
+          emptyMessage={t('noStaffFound')}
         />
       </div>
 
@@ -547,7 +551,7 @@ export default function StaffManagementPage() {
       <Dialog open={isHiringModalOpen} onOpenChange={setIsHiringModalOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Hire New Staff Member</DialogTitle>
+            <DialogTitle>{t('hireNewStaff')}</DialogTitle>
           </DialogHeader>
           <MultiStepForm
             steps={hiringFormSteps}

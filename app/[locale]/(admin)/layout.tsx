@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
-import { ToastProvider } from '../../components/ui/Toast';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -51,47 +50,45 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <ToastProvider>
-      <div 
-        className="min-h-screen flex transition-colors duration-200"
-        style={{ backgroundColor: 'var(--admin-background)' }}
-      >
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-64 fixed inset-y-0 left-0 z-50">
-          <Sidebar />
-        </div>
+    <div 
+      className="min-h-screen flex transition-colors duration-200"
+      style={{ backgroundColor: 'var(--admin-background)' }}
+    >
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block w-64 fixed inset-y-0 left-0 z-50">
+        <Sidebar />
+      </div>
 
-        {/* Mobile Sidebar */}
-        <div className="lg:hidden">
-          <div className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}>
-            <Sidebar 
-              isOpen={isSidebarOpen} 
-              onClose={closeSidebar}
-            />
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
-          {/* Header */}
-          <Header 
-            title="Admin Dashboard" 
-            onMenuToggle={toggleSidebar}
+      {/* Mobile Sidebar */}
+      <div className="lg:hidden">
+        <div className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+          <Sidebar 
+            isOpen={isSidebarOpen} 
+            onClose={closeSidebar}
           />
-          
-          {/* Page Content */}
-          <main 
-            className="flex-1 p-4 sm:p-6 transition-colors duration-200"
-            style={{ backgroundColor: 'var(--admin-content-background)' }}
-          >
-            <div className="max-w-full overflow-x-auto">
-              {children}
-            </div>
-          </main>
         </div>
       </div>
-    </ToastProvider>
+
+      {/* Main Content Area */}
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        {/* Header */}
+        <Header 
+          title="Admin Dashboard" 
+          onMenuToggle={toggleSidebar}
+        />
+        
+        {/* Page Content */}
+        <main 
+          className="flex-1 p-4 sm:p-6 transition-colors duration-200"
+          style={{ backgroundColor: 'var(--admin-content-background)' }}
+        >
+          <div className="max-w-full overflow-x-auto">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
   );
 }
