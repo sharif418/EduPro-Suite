@@ -101,61 +101,17 @@ const nextConfig: NextConfig = {
 
   // Experimental features for performance and standalone build
   experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@heroicons/react'],
     ...(process.env.NODE_ENV === 'development' && {
       serverActions: {
         allowedOrigins: ['*'],
       },
     }),
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
   },
 
-  // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Production optimizations
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-
-    // Bundle analyzer in development
-    if (dev && process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-      config.plugins.push(
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'server',
-          openAnalyzer: true,
-        })
-      );
-    }
-
-    return config;
-  },
+  // Webpack optimizations - disabled for Replit memory constraints
+  // webpack: (config, { dev, isServer }) => {
+  //   return config;
+  // },
 
   // Environment-specific configurations
   env: {
