@@ -21,32 +21,34 @@ interface EnvironmentConfig {
 const ENVIRONMENT_CONFIGS: Record<string, EnvironmentConfig> = {
   development: {
     NODE_ENV: {
-      required: true,
+      required: false,
       type: 'string',
       description: 'Node.js environment (development, production, test)',
       defaultValue: 'development'
     },
     DATABASE_URL: {
       required: true,
-      type: 'url',
+      type: 'string',
       description: 'PostgreSQL database connection string'
     },
     JWT_SECRET: {
-      required: true,
+      required: false,
       type: 'string',
       description: 'JWT signing secret (minimum 32 characters)',
+      defaultValue: 'dev-jwt-secret-key-for-development-only-min-32-chars',
       validation: (value: string) => value.length >= 32
     },
     NEXTAUTH_URL: {
-      required: true,
-      type: 'url',
+      required: false,
+      type: 'string',
       description: 'NextAuth.js canonical URL',
-      defaultValue: 'http://localhost:3000'
+      defaultValue: 'http://localhost:5000'
     },
     NEXTAUTH_SECRET: {
-      required: true,
+      required: false,
       type: 'string',
       description: 'NextAuth.js secret for JWT encryption',
+      defaultValue: 'dev-nextauth-secret-for-development-only-min-32-chars',
       validation: (value: string) => value.length >= 32
     }
   },
@@ -195,6 +197,7 @@ export class EnvironmentValidator {
         
         if (config.defaultValue) {
           result.suggestions.push(`Set ${key}=${config.defaultValue} (default value)`);
+          process.env[key] = config.defaultValue;
         }
         continue;
       }
@@ -203,6 +206,7 @@ export class EnvironmentValidator {
       if (!value && !config.required) {
         if (config.defaultValue) {
           result.warnings.push(`Using default value for ${key}: ${config.defaultValue}`);
+          process.env[key] = config.defaultValue;
         }
         continue;
       }

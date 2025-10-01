@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
         : "script-src 'self' 'strict-dynamic' https:",
       // Connect sources - explicit hosts for production
       isDev
-        ? "connect-src 'self' http://* ws://* data: blob:"
+        ? "connect-src 'self' http://* ws://* wss://* https://* data: blob:"
         : `connect-src 'self' ${allowedOrigins.join(' ')} wss://${allowedOrigins.map(o => o.replace('https://', '')).join(' wss://')} data: blob:`,
       // Image sources
       "img-src 'self' data: blob: https: http:",
@@ -49,7 +49,8 @@ const nextConfig: NextConfig = {
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-      "frame-ancestors 'none'",
+      // Allow iframe in development for Replit proxy
+      isDev ? "frame-ancestors *" : "frame-ancestors 'none'",
       ...(isProd ? ["upgrade-insecure-requests"] : [])
     ];
     
@@ -57,11 +58,11 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // Security headers
-          {
+          // Security headers - Allow iframe in development for Replit proxy
+          ...(isDev ? [] : [{
             key: 'X-Frame-Options',
             value: 'DENY'
-          },
+          }]),
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff'
@@ -102,6 +103,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@heroicons/react'],
+    ...(process.env.NODE_ENV === 'development' && {
+      serverActions: {
+        allowedOrigins: ['*'],
+      },
+    }),
     turbo: {
       rules: {
         '*.svg': {

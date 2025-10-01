@@ -15,8 +15,8 @@ try {
 }
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOSTNAME || 'localhost';
-const port = parseInt(process.env.PORT || '3000', 10);
+const hostname = '0.0.0.0';
+const port = parseInt(process.env.PORT || '5000', 10);
 
 // Prepare the Next.js app
 const app = next({ dev, hostname, port });
