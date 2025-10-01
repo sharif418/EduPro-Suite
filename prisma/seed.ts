@@ -221,43 +221,58 @@ async function main() {
       create: studentData,
     });
 
-    // Create student address
-    const studentAddress = await prisma.studentAddress.create({
-      data: {
-        presentAddress: `Student Address ${i + 1}, Dhaka`,
-        permanentAddress: `Permanent Address ${i + 1}, Bangladesh`,
-      },
+    // Skip creating student profile if already exists
+    const existingStudent = await prisma.student.findUnique({
+      where: { studentId: `STU${String(i + 1).padStart(4, '0')}` }
     });
 
-    // Create student profile
-    const guardian = guardianProfiles[i % guardianProfiles.length];
-    const studentProfile = await prisma.student.create({
-      data: {
-        studentId: `STU${String(i + 1).padStart(4, '0')}`,
-        name: student.name,
-        email: student.email,
-        dateOfBirth: new Date('2010-01-01'),
-        gender: i % 2 === 0 ? Gender.FEMALE : Gender.MALE,
-        bloodGroup: 'O+',
-        religion: 'Islam',
-        nationality: 'Bangladeshi',
-        admissionDate: new Date(),
-        guardianId: guardian.id,
-        addressId: studentAddress.id,
-      },
-    });
+    let studentProfile;
+    let enrollment;
+    
+    if (existingStudent) {
+      studentProfile = existingStudent;
+      enrollment = await prisma.enrollment.findFirst({
+        where: { studentId: studentProfile.id }
+      });
+    } else {
+      // Create student address
+      const studentAddress = await prisma.studentAddress.create({
+        data: {
+          presentAddress: `Student Address ${i + 1}, Dhaka`,
+          permanentAddress: `Permanent Address ${i + 1}, Bangladesh`,
+        },
+      });
 
-    // Create enrollment
-    const section = createdSections[i % createdSections.length];
-    const enrollment = await prisma.enrollment.create({
-      data: {
-        studentId: studentProfile.id,
-        classLevelId: section.classLevelId,
-        sectionId: section.id,
-        academicYearId: academicYear.id,
-        rollNumber: i + 1,
-      },
-    });
+      // Create student profile
+      const guardian = guardianProfiles[i % guardianProfiles.length];
+      studentProfile = await prisma.student.create({
+        data: {
+          studentId: `STU${String(i + 1).padStart(4, '0')}`,
+          name: student.name,
+          email: student.email,
+          dateOfBirth: new Date('2010-01-01'),
+          gender: i % 2 === 0 ? Gender.FEMALE : Gender.MALE,
+          bloodGroup: 'O+',
+          religion: 'Islam',
+          nationality: 'Bangladeshi',
+          admissionDate: new Date(),
+          guardianId: guardian.id,
+          addressId: studentAddress.id,
+        },
+      });
+
+      // Create enrollment
+      const section = createdSections[i % createdSections.length];
+      enrollment = await prisma.enrollment.create({
+        data: {
+          studentId: studentProfile.id,
+          classLevelId: section.classLevelId,
+          sectionId: section.id,
+          academicYearId: academicYear.id,
+          rollNumber: i + 1,
+        },
+      });
+    }
 
     createdStudents.push({ user: student, profile: studentProfile, enrollment });
     console.log('✅ STUDENT user created:', { id: student.id, email: student.email, role: student.role, studentId: studentProfile.studentId });
@@ -292,26 +307,26 @@ async function main() {
     console.log('✅ GUARDIAN user created:', { id: guardian.id, email: guardian.email, role: guardian.role });
   }
 
-  // Create sample assignments
-  for (let i = 0; i < Math.min(createdSections.length, createdSubjects.length); i++) {
-    const section = createdSections[i];
-    const subject = createdSubjects[i % createdSubjects.length];
-    const teacher = createdTeachers[i % createdTeachers.length];
-    
-    const assignment = await prisma.assignment.create({
-      data: {
-        title: `${subject.name} Assignment ${i + 1}`,
-        description: `Sample assignment for ${subject.name}`,
-        classLevelId: section.classLevelId,
-        sectionId: section.id,
-        subjectId: subject.id,
-        teacherId: teacher.staff.id,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        maxMarks: 100,
-      },
-    });
-    console.log('✅ Assignment created:', assignment.title);
-  }
+  // Create sample assignments - Skipped (table doesn't exist in migration)
+  // for (let i = 0; i < Math.min(createdSections.length, createdSubjects.length); i++) {
+  //   const section = createdSections[i];
+  //   const subject = createdSubjects[i % createdSubjects.length];
+  //   const teacher = createdTeachers[i % createdTeachers.length];
+  //   
+  //   const assignment = await prisma.assignment.create({
+  //     data: {
+  //       title: `${subject.name} Assignment ${i + 1}`,
+  //       description: `Sample assignment for ${subject.name}`,
+  //       classLevelId: section.classLevelId,
+  //       sectionId: section.id,
+  //       subjectId: subject.id,
+  //       teacherId: teacher.staff.id,
+  //       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+  //       maxMarks: 100,
+  //     },
+  //   });
+  //   console.log('✅ Assignment created:', assignment.title);
+  // }
 
   // Create sample exams
   for (let i = 0; i < Math.min(createdSections.length, createdSubjects.length); i++) {
