@@ -481,7 +481,7 @@ export async function PUT(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const user = await verifyAuth(request);
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN')) {
       return createErrorResponse('Admin access required', 403);
     }
 

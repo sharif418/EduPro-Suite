@@ -165,7 +165,7 @@ export async function DELETE(request: NextRequest) {
       return createErrorResponse('File not found', 404);
     }
 
-    if (fileRecord.uploadedBy !== user.userId && user.role !== 'ADMIN') {
+    if (fileRecord.uploadedBy !== user.userId && user.role !== 'ADMIN' && user.role !== 'SUPERADMIN') {
       return createErrorResponse('Permission denied', 403);
     }
 

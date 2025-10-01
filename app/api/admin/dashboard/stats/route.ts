@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       return createErrorResponse('Unauthorized', 401, 'AUTH_REQUIRED');
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN') {
       return createErrorResponse('Forbidden - Admin access required', 403, 'INSUFFICIENT_PERMISSIONS');
     }
 

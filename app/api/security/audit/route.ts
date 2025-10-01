@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN') {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN') {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
