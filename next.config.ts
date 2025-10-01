@@ -15,9 +15,6 @@ const nextConfig: NextConfig = {
     tsconfigPath: './tsconfig.json',
   },
   
-  // Build optimization
-  swcMinify: true,
-  
   // Compression and performance optimizations
   compress: true,
   poweredByHeader: false,
