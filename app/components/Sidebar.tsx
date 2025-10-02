@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
+import { Home, BookOpen, Users, Briefcase, Calendar, FileText, DollarSign } from 'lucide-react';
 
 interface SidebarProps {
   className?: string;

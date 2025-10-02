@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 
 export default function LoginPage() {
@@ -11,6 +11,12 @@ export default function LoginPage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string || 'en';
+
+  useEffect(() => {
+    router.prefetch(`/${locale}/admin`);
+    router.prefetch(`/${locale}/teacher`);
+    router.prefetch(`/${locale}`);
+  }, [locale, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
