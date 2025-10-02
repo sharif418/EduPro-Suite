@@ -102,3 +102,11 @@ admin_cookies.txt
 teacher_cookies.txt
 fresh_admin_cookies.txt
 cookies_*.txt
+
+# Uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Backup files
+/backups/*
+!/backups/.gitkeep

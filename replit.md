@@ -1,6 +1,6 @@
-# EduPro Suite - Replit Environment Setup
+# EduPro Suite - Madrasah Management System
 
-## Project Overview
+## 📌 Project Overview
 
 EduPro Suite is a comprehensive education management system built with:
 - **Next.js 15.5.3** with App Router
@@ -10,167 +10,383 @@ EduPro Suite is a comprehensive education management system built with:
 - **Multi-language support** (English, Bengali, Arabic)
 - **Role-based authentication** (SUPERADMIN, TEACHER, STUDENT, GUARDIAN)
 
-## Current Setup Status
-
-### ✅ Setup Successfully Completed!
-
-1. **Database Configuration**
-   - ✅ PostgreSQL database provisioned via Replit
-   - ✅ Database URL configured and connected
-   - ✅ Prisma schema deployed successfully
-   - ✅ Database seeded with test data
-
-2. **Test Accounts Created**
-   - SUPERADMIN: `admin@edupro.com` / `admin123`
-   - TEACHER: `teacher@edupro.com` / `teacher123`
-   - STUDENT: `student@edupro.com` / `student123`
-   - GUARDIAN: `guardian@edupro.com` / `guardian123`
-
-3. **Environment Configuration**
-   - ✅ Environment variables configured in `.env.local`
-   - ✅ JWT secrets set for development
-   - ✅ Server configured to bind to `0.0.0.0:5000`
-   - ✅ Next.js 15 async params compatibility fixed
-
-4. **Next.js Configuration for Replit**
-   - ✅ Configured to allow iframe embedding in development (for Replit proxy)
-   - ✅ CSP headers adjusted for websocket connections
-   - ✅ X-Frame-Options removed in development
-   - ✅ Server actions configured to allow all origins in development
-   - ✅ Removed deprecated `swcMinify` option
-
-5. **Dependencies & Build**
-   - ✅ All npm packages installed successfully (819 packages)
-   - ✅ Prisma client generated
-   - ✅ Application running successfully on port 5000
-
-6. **Deployment Configuration**
-   - ✅ Autoscale deployment configured
-   - ✅ Build command: `npm run build`
-   - ✅ Start command: `npm start`
-
-7. **RBAC Permission Fixes** (October 1, 2025)
-   - ✅ Fixed SUPERADMIN role access to admin APIs
-   - ✅ Updated 10+ admin API routes to allow both ADMIN and SUPERADMIN roles
-   - ✅ Routes fixed: dashboard stats, SMS broadcast, backup operations, security audit, file upload/delete
-   - ✅ All admin features now accessible to SUPERADMIN users
-
-### 🎉 Application Status: RUNNING & FULLY FUNCTIONAL
-
-The application is now successfully running and accessible via the Replit webview. All authentication features are working correctly, and SUPERADMIN users can access all admin features without permission errors.
-
-## Project Structure
-
-```
-edupro-suite/
-├── app/                      # Next.js 15 App Router
-│   ├── [locale]/            # Internationalized routes
-│   ├── api/                 # API routes
-│   ├── components/          # React components
-│   ├── lib/                 # Utilities and services
-│   └── contexts/            # React contexts
-├── prisma/                  # Database
-│   ├── schema.prisma        # Database schema
-│   ├── migrations/          # Database migrations
-│   └── seed.ts              # Database seeding
-├── messages/                # i18n translation files
-├── public/                  # Static assets
-├── server.ts                # Custom Next.js server with Socket.IO
-├── next.config.ts           # Next.js configuration
-└── package.json             # Dependencies
-
-```
-
-## Available Scripts
-
-- `npm run dev` - Start Next.js development server (port 5000)
-- `npm run dev:custom` - Start custom server with Socket.IO
-- `npm run build` - Build for production
-- `npm run db:deploy` - Deploy database migrations
-- `npm run db:seed` - Seed database with test data
-- `npm run db:reset` - Reset database
-
-## Features
-
-### Core Features
-- Multi-role dashboard (Admin, Teacher, Student, Guardian)
-- Student enrollment and attendance tracking
-- Staff management with attendance and leave tracking
-- Examination system with grading
-- Financial management (fees, invoices, payments)
-- Library management system
-- Assignment and lesson planning
-- Real-time notifications (Socket.IO)
-- Multi-language support (i18n)
-- PWA support with offline capabilities
-
-### Technical Features
-- Role-based access control (RBAC)
-- JWT authentication
-- PostgreSQL with Prisma ORM
-- Real-time updates via Socket.IO
-- Responsive design with Tailwind CSS
-- TypeScript for type safety
-- Security headers and CSP
-- Health monitoring endpoints
-
-## Database Schema
-
-The application includes 40+ models covering:
-- User management (Users, Staff, Students, Guardians)
-- Academic structure (Classes, Sections, Subjects)
-- Examination system (Exams, Grades, Results)
-- Financial management (Invoices, Payments, Expenses)
-- Library system (Books, Issues, Fines)
-- Notifications and messaging
-- Attendance tracking (Staff and Students)
-- Assignment and lesson management
-
-## Configuration Notes
-
-### Environment Variables (Using Defaults)
-- `NODE_ENV`: development
-- `DATABASE_URL`: Connected to Replit PostgreSQL
-- `JWT_SECRET`: dev-jwt-secret-key-for-development-only-min-32-chars
-- `NEXTAUTH_SECRET`: dev-nextauth-secret-for-development-only-min-32-chars
-- `NEXTAUTH_URL`: http://localhost:5000
-
-### Port Configuration
-- Application binds to: `0.0.0.0:5000`
-- This allows Replit's proxy to forward requests
-
-### Security Configuration for Development
-- Frame ancestors allowed (for Replit iframe)
-- X-Frame-Options disabled in development
-- Server actions accept all origins
-- WebSocket connections allowed from all sources
-
-## Next Steps
-
-1. **Testing**: Test all major features and user flows with the test accounts
-2. **Customization**: Configure application settings and preferences
-3. **Production**: Deploy to production when ready using Replit Deploy
-4. **Documentation**: Review API documentation and user guides in `/docs`
-
-## Usage
-
-1. **Access the Application**: Click on the Webview to see the running application
-2. **Login**: Use one of the test accounts listed above
-3. **Explore**: Navigate through the dashboard based on your role
-4. **Customize**: Modify settings, add users, configure academic year, etc.
-
-## Support Resources
-
-- Original Repository: [GitHub](https://github.com/...)
-- Next.js Documentation: https://nextjs.org/docs
-- Prisma Documentation: https://www.prisma.io/docs
-- Replit Deployments: https://docs.replit.com/category/deployments
+### Target Market
+- Madrasah (Islamic Educational Institutions) in Bangladesh
+- General Educational Institutions
+- Schools, Colleges, and Universities
 
 ---
 
-**Last Updated**: October 1, 2025
-**Status**: ✅ Setup Complete - Application Running Successfully
-**Database**: ✅ Connected and seeded
-**Dependencies**: ✅ Installed (819 packages)
-**Server**: ✅ Running on port 5000
-**Deployment**: ✅ Configured for Autoscale
+## 🚀 Current Status
+
+### ✅ Completed (October 2, 2025)
+1. **Environment Setup**
+   - Dependencies installed successfully
+   - PostgreSQL database created and configured
+   - Prisma Client generated
+   - Database migrations applied
+   - Development server running on port 5000
+
+2. **Project Cleanup**
+   - Removed unnecessary Docker files
+   - Deleted test and debug files
+   - Cleaned up TODO and documentation files
+   - Removed unused monitoring and nginx configs
+
+3. **Planning & Documentation**
+   - Created comprehensive IMPLEMENTATION_PLAN.md
+   - Feature analysis completed
+   - Roadmap defined
+
+### ⏳ In Progress
+- Environment variables configuration
+- Madrasah-specific feature implementation
+- UI/UX enhancements for Islamic aesthetics
+
+---
+
+## 🏗️ Project Structure
+
+```
+edupro-suite/
+├── app/                          # Next.js App Router
+│   ├── [locale]/                 # Multi-language routes
+│   │   ├── (admin)/             # Admin portal
+│   │   ├── (teacher)/           # Teacher portal
+│   │   ├── (student)/           # Student portal
+│   │   ├── (guardian)/          # Guardian portal
+│   │   └── login/               # Login page
+│   ├── api/                     # API routes
+│   │   ├── auth/               # Authentication
+│   │   ├── admin/              # Admin APIs
+│   │   ├── teacher/            # Teacher APIs
+│   │   ├── student/            # Student APIs
+│   │   └── ...                 # Other APIs
+│   ├── components/             # Shared components
+│   ├── lib/                    # Utilities and helpers
+│   └── hooks/                  # Custom React hooks
+├── prisma/                     # Database schema and migrations
+│   ├── schema.prisma          # Prisma schema
+│   ├── migrations/            # Database migrations
+│   └── seed.ts               # Database seeding
+├── public/                    # Static assets
+├── messages/                  # i18n translation files
+│   ├── en.json               # English
+│   ├── bn.json               # Bengali
+│   └── ar.json               # Arabic
+├── .env                      # Environment variables (not in git)
+├── .env.example             # Environment template
+├── next.config.ts           # Next.js configuration
+├── server.ts                # Custom server with Socket.IO
+├── package.json             # Dependencies
+└── IMPLEMENTATION_PLAN.md   # Full implementation plan
+```
+
+---
+
+## 🔧 Development Commands
+
+### Essential Commands
+- `npm run dev` - Start Next.js development server (port 5000)
+- `npm run build` - Build for production
+- `npm start` - Start production server
+
+### Database Commands
+- `npx prisma generate` - Generate Prisma Client
+- `npx prisma migrate deploy` - Run migrations
+- `npx prisma migrate dev` - Create new migration (development)
+- `npx prisma db seed` - Seed the database
+- `npx prisma studio` - Open Prisma Studio (database GUI)
+
+### Other Commands
+- `npm run lint` - Run ESLint
+- `npm run typecheck` - TypeScript type checking
+
+---
+
+## 🗄️ Database Schema
+
+The application uses PostgreSQL with comprehensive models:
+
+### Core Models
+- **User** - Base user authentication
+- **AcademicYear** - Academic session management
+- **ClassLevel** - Class/grade levels
+- **Section** - Class sections
+- **Subject** - Subjects/courses
+- **Student** - Student profiles
+- **Staff** - Teacher and staff profiles
+- **Enrollment** - Student-class enrollment
+
+### Academic Models
+- **Exam** - Examination management
+- **ExamSchedule** - Exam timetable
+- **GradingSystem** - Grading configurations
+- **Mark** - Student marks
+- **Result** - Processed results
+- **Assignment** - Homework/assignments
+- **LessonPlan** - Teacher lesson plans
+
+### Financial Models
+- **FeeHead** - Fee categories
+- **FeeStructure** - Fee amounts by class
+- **Invoice** - Student invoices
+- **Payment** - Payment records
+- **Expense** - Institutional expenses
+
+### Communication Models
+- **Notification** - System notifications
+- **ClassAnnouncement** - Class announcements
+- **PushSubscription** - Push notification subscriptions
+
+### Other Models
+- **Attendance** - Student attendance
+- **StaffAttendance** - Staff attendance
+- **LeaveRequest** - Leave applications
+- **Library** - Library management (partial)
+
+---
+
+## 🌐 Multi-Language Support
+
+### Supported Languages
+1. **English (en)** - Default
+2. **Bengali (bn)** - Primary for Bangladesh
+3. **Arabic (ar)** - RTL support for Islamic content
+
+### Translation Files
+- `messages/en.json` - English translations
+- `messages/bn.json` - Bengali translations
+- `messages/ar.json` - Arabic translations
+
+### Usage
+All pages use `next-intl` for internationalization:
+```typescript
+import { useTranslations } from 'next-intl';
+
+const t = useTranslations('admin');
+const title = t('dashboard.title');
+```
+
+---
+
+## 🔐 Authentication & Roles
+
+### User Roles
+1. **SUPERADMIN** - Full system access
+2. **ADMIN** - Administrative access
+3. **TEACHER** - Teacher portal access
+4. **STUDENT** - Student portal access
+5. **GUARDIAN** - Parent/guardian access
+6. **ACCOUNTANT** - Financial management
+7. **LIBRARIAN** - Library management
+
+### Authentication Flow
+- JWT-based authentication
+- Session stored in HTTP-only cookies
+- Role-based route protection
+- Automatic redirect on unauthorized access
+
+---
+
+## 📦 Key Features
+
+### ✅ Implemented
+- Multi-role dashboards
+- Student management
+- Staff management
+- Attendance system
+- Examination system
+- Financial management
+- Assignment system
+- Lesson planning
+- Real-time notifications
+- Multi-language support
+- PWA support
+- Library management (basic)
+
+### 🚧 Coming Soon (See IMPLEMENTATION_PLAN.md)
+- Hifz progress tracking
+- Islamic subjects & curriculum
+- Online admission system
+- OMR examination system
+- Bulk upload (Excel/CSV)
+- SMS gateway (Bangladesh)
+- Payment gateway (SSLCommerz, bKash, Nagad)
+- Transport management
+- Hostel management
+- Advanced reporting
+
+---
+
+## 🎨 UI/UX Design
+
+### Design System
+- **Framework**: Tailwind CSS
+- **Components**: Custom component library
+- **Icons**: Lucide React
+- **Charts**: Recharts
+- **Animations**: Framer Motion
+
+### Theme Support
+- Light mode
+- Dark mode
+- User preference persistence
+
+### Responsive Design
+- Mobile-first approach
+- Tablet optimized
+- Desktop full-featured
+
+---
+
+## 🔌 API Structure
+
+### API Routes
+All APIs are in `/app/api/`:
+
+#### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
+
+#### Admin APIs
+- `/api/admin/students` - Student CRUD
+- `/api/admin/staff` - Staff CRUD
+- `/api/admin/exams` - Exam management
+- `/api/admin/finance` - Financial operations
+- `/api/admin/academic-years` - Academic year management
+
+#### Teacher APIs
+- `/api/teacher/classes` - Assigned classes
+- `/api/teacher/attendance` - Attendance marking
+- `/api/teacher/assignments` - Assignment management
+- `/api/teacher/lessons` - Lesson plans
+
+#### Student APIs
+- `/api/student/assignments` - View assignments
+- `/api/student/lessons` - View lesson plans
+
+### Real-time APIs
+- `GET/POST /api/socket` - Socket.IO management
+- WebSocket connection for live notifications
+
+---
+
+## 🛠️ Development Guidelines
+
+### Code Style
+- Use TypeScript for all new code
+- Follow ESLint rules
+- Use Prettier for formatting
+- Component-based architecture
+
+### Best Practices
+1. **API Routes**: Handle errors gracefully
+2. **Components**: Keep them small and reusable
+3. **State Management**: Use React hooks and context
+4. **Database**: Always use Prisma for queries
+5. **Authentication**: Check user role in all protected routes
+
+### Testing
+- Write tests for critical business logic
+- Test API endpoints
+- Test user flows
+
+---
+
+## 🚀 Deployment
+
+### Environment Setup
+1. Copy `.env.example` to `.env`
+2. Configure database URL
+3. Set JWT secrets (32+ characters)
+4. Configure email/SMS if needed
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+### Environment Variables
+See `.env.example` for all required variables.
+
+---
+
+## 📚 Resources
+
+### Documentation
+- [Next.js Docs](https://nextjs.org/docs)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Socket.IO](https://socket.io/docs)
+
+### Implementation Plan
+See `IMPLEMENTATION_PLAN.md` for:
+- Detailed feature roadmap
+- Missing features list
+- Phase-wise implementation
+- Success metrics
+
+---
+
+## 🐛 Known Issues
+
+### Current Issues
+None reported
+
+### Limitations
+- Library module is partially implemented
+- Some advanced reports need enhancement
+- Mobile app version not available (PWA only)
+
+---
+
+## 📝 Recent Changes
+
+### October 2, 2025
+- ✅ Completed Replit environment setup
+- ✅ Installed all dependencies
+- ✅ Configured PostgreSQL database
+- ✅ Applied database migrations
+- ✅ Cleaned up unnecessary files
+- ✅ Created comprehensive implementation plan
+- ✅ Server running successfully on port 5000
+
+---
+
+## 🎯 Next Steps
+
+1. Configure environment variables
+2. Implement Madrasah-specific class types
+3. Add Hifz progress tracking module
+4. Create Islamic UI components
+5. Integrate payment gateways
+6. Add SMS notification system
+
+---
+
+## 👥 User Preferences
+
+### Development Preferences
+- Language: Bengali/English
+- Focus: Madrasah-specific features
+- Priority: Bangladesh market adaptations
+- Design: Islamic aesthetics with modern UI
+
+---
+
+## 📞 Support
+
+For issues or questions, check:
+1. `IMPLEMENTATION_PLAN.md` - Feature roadmap
+2. `README.md` - General project info
+3. API documentation in code
+4. Prisma schema for database structure
+
+---
+
+**Last Updated**: October 2, 2025  
+**Status**: ✅ Development Environment Ready | ⏳ Feature Implementation In Progress  
+**Version**: 0.1.0
