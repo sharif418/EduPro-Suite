@@ -1,6 +1,7 @@
 'use client';
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/app/components/ui/Tabs';
+import { BarChart3, Wallet, Users, Receipt } from 'lucide-react';
 import DashboardTab from './components/DashboardTab';
 import FeeManagementTab from './components/FeeManagementTab';
 import StudentFeesTab from './components/StudentFeesTab';
@@ -39,19 +40,19 @@ export default function FinancePage() {
             <div className="border-b border-gray-200 px-6 pt-6">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                  <span>📊</span>
+                  <BarChart3 className="w-4 h-4" />
                   Dashboard
                 </TabsTrigger>
                 <TabsTrigger value="fee-management" className="flex items-center gap-2">
-                  <span>💰</span>
+                  <Wallet className="w-4 h-4" />
                   Fee Management
                 </TabsTrigger>
                 <TabsTrigger value="student-fees" className="flex items-center gap-2">
-                  <span>👥</span>
+                  <Users className="w-4 h-4" />
                   Student Fees
                 </TabsTrigger>
                 <TabsTrigger value="expenses" className="flex items-center gap-2">
-                  <span>📋</span>
+                  <Receipt className="w-4 h-4" />
                   Expenses
                 </TabsTrigger>
               </TabsList>

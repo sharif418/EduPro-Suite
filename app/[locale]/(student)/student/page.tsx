@@ -119,7 +119,7 @@ export default function StudentDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
-                Welcome back, {user?.name}! 📚
+                Welcome back, {user?.name}!
               </h1>
               <p className="text-blue-100 text-base sm:text-lg">
                 Here's your academic overview for today

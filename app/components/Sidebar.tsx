@@ -20,37 +20,37 @@ export default function Sidebar({ className = '', isOpen = true, onClose }: Side
     {
       name: t('dashboard'),
       href: `/${locale}/admin`,
-      icon: '🏠', // Home icon
+      icon: Home,
     },
     {
       name: t('academicSetup'),
       href: `/${locale}/admin/academic-setup`,
-      icon: '📚', // Book icon
+      icon: BookOpen,
     },
     {
       name: t('studentManagement'),
       href: `/${locale}/admin/student-management`,
-      icon: '👥', // Users icon
+      icon: Users,
     },
     {
       name: t('staffManagement'),
       href: `/${locale}/admin/staff-management`,
-      icon: '💼', // Briefcase icon
+      icon: Briefcase,
     },
     {
       name: t('leaveManagement'),
       href: `/${locale}/admin/leave-management`,
-      icon: '📋', // Calendar icon
+      icon: Calendar,
     },
     {
       name: t('examinations'),
       href: `/${locale}/admin/examinations`,
-      icon: '📋', // Clipboard icon
+      icon: FileText,
     },
     {
       name: t('finance'),
       href: `/${locale}/admin/finance`,
-      icon: '💰', // Dollar sign icon
+      icon: DollarSign,
     },
   ];
 
@@ -172,7 +172,7 @@ export default function Sidebar({ className = '', isOpen = true, onClose }: Side
                     }
                   }}
                 >
-                  <span className="text-lg sm:text-xl flex-shrink-0">{item.icon}</span>
+                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   <span className="font-medium text-sm sm:text-base truncate">{item.name}</span>
                 </Link>
               </li>

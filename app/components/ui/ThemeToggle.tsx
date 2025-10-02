@@ -2,6 +2,7 @@
 
 import { useTheme } from '../ThemeProvider';
 import { useState } from 'react';
+import { SunMedium, MoonStar, Monitor, ChevronDown, Check } from 'lucide-react';
 
 export function ThemeToggle() {
   const { theme, setTheme, actualTheme } = useTheme();
@@ -11,19 +12,19 @@ export function ThemeToggle() {
     {
       value: 'light' as const,
       label: 'Light',
-      icon: '☀️',
+      icon: SunMedium,
       description: 'Light theme'
     },
     {
       value: 'dark' as const,
       label: 'Dark',
-      icon: '🌙',
+      icon: MoonStar,
       description: 'Dark theme'
     },
     {
       value: 'system' as const,
       label: 'System',
-      icon: '💻',
+      icon: Monitor,
       description: 'Follow system preference'
     }
   ];
@@ -39,25 +40,15 @@ export function ThemeToggle() {
         aria-label="Toggle theme"
         title={`Current theme: ${currentTheme.label}`}
       >
-        <span className="text-lg">{currentTheme.icon}</span>
+        <currentTheme.icon className="w-5 h-5" />
         <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">
           {currentTheme.label}
         </span>
-        <svg
+        <ChevronDown
           className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        />
       </button>
 
       {/* Dropdown Menu */}
@@ -90,30 +81,20 @@ export function ThemeToggle() {
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
-                <span className="text-lg">{themeOption.icon}</span>
+                <themeOption.icon className="w-5 h-5" />
                 <div className="flex-1">
                   <div className="font-medium">{themeOption.label}</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {themeOption.description}
                     {themeOption.value === 'system' && (
                       <span className="ml-1">
-                        ({actualTheme === 'dark' ? '🌙' : '☀️'})
+                        ({actualTheme === 'dark' ? 'Dark' : 'Light'})
                       </span>
                     )}
                   </div>
                 </div>
                 {theme === themeOption.value && (
-                  <svg
-                    className="w-4 h-4 text-indigo-600 dark:text-indigo-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 )}
               </button>
             ))}
@@ -145,15 +126,17 @@ export function QuickThemeToggle() {
   };
 
   const getIcon = () => {
-    if (theme === 'light') return '☀️';
-    if (theme === 'dark') return '🌙';
-    return actualTheme === 'dark' ? '🌙' : '☀️';
+    if (theme === 'light') return SunMedium;
+    if (theme === 'dark') return MoonStar;
+    return actualTheme === 'dark' ? MoonStar : SunMedium;
   };
 
   const getLabel = () => {
     if (theme === 'system') return `System (${actualTheme})`;
     return theme.charAt(0).toUpperCase() + theme.slice(1);
   };
+
+  const Icon = getIcon();
 
   return (
     <button
@@ -162,7 +145,7 @@ export function QuickThemeToggle() {
       aria-label={`Switch theme (current: ${getLabel()})`}
       title={`Current: ${getLabel()}. Click to cycle themes.`}
     >
-      <span className="text-xl">{getIcon()}</span>
+      <Icon className="w-5 h-5" />
     </button>
   );
 }

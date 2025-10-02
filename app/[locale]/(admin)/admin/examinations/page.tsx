@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useSession } from '../../../../hooks/useSession';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../../components/ui/Tabs';
 import { ToastProvider } from '../../../../components/ui/Toast';
+import { ClipboardList, Scale, FileText, Calendar, PenLine, BarChart3 } from 'lucide-react';
 import GradingSystemsTab from './components/GradingSystemsTab';
 import ExamsTab from './components/ExamsTab';
 import ExamScheduleTab from './components/ExamScheduleTab';
@@ -20,7 +21,7 @@ export default function ExaminationsPage() {
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-8 text-white">
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <span className="text-3xl">📋</span>
+            <ClipboardList className="w-8 h-8" />
           </div>
           <div>
             <h1 className="text-3xl font-bold mb-2">
@@ -38,7 +39,7 @@ export default function ExaminationsPage() {
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <span className="text-2xl">⚖️</span>
+              <Scale className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Grading Systems</p>
@@ -50,7 +51,7 @@ export default function ExaminationsPage() {
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <span className="text-2xl">📝</span>
+              <FileText className="w-6 h-6 text-green-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Exams</p>
@@ -62,7 +63,7 @@ export default function ExaminationsPage() {
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
-              <span className="text-2xl">📅</span>
+              <Calendar className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Scheduled Exams</p>
@@ -74,7 +75,7 @@ export default function ExaminationsPage() {
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
-              <span className="text-2xl">📊</span>
+              <BarChart3 className="w-6 h-6 text-purple-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Results Processed</p>
@@ -90,23 +91,23 @@ export default function ExaminationsPage() {
           <div className="border-b border-gray-200 px-6 py-4">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="grading-systems" className="flex items-center space-x-2">
-                <span>⚖️</span>
+                <Scale className="w-4 h-4" />
                 <span>Grading Systems</span>
               </TabsTrigger>
               <TabsTrigger value="exams" className="flex items-center space-x-2">
-                <span>📝</span>
+                <FileText className="w-4 h-4" />
                 <span>Exams</span>
               </TabsTrigger>
               <TabsTrigger value="schedules" className="flex items-center space-x-2">
-                <span>📅</span>
+                <Calendar className="w-4 h-4" />
                 <span>Schedules</span>
               </TabsTrigger>
               <TabsTrigger value="marks-entry" className="flex items-center space-x-2">
-                <span>✏️</span>
+                <PenLine className="w-4 h-4" />
                 <span>Marks Entry</span>
               </TabsTrigger>
               <TabsTrigger value="process-results" className="flex items-center space-x-2">
-                <span>📊</span>
+                <BarChart3 className="w-4 h-4" />
                 <span>Process Results</span>
               </TabsTrigger>
             </TabsList>

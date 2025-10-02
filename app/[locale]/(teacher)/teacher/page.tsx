@@ -90,7 +90,7 @@ export default function TeacherDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
-                {getCurrentGreeting()}, {user?.name}! 👨‍🏫
+                {getCurrentGreeting()}, {user?.name}!
               </h1>
               <p className="text-purple-100 text-base sm:text-lg">
                 {t('welcomeMessage')}

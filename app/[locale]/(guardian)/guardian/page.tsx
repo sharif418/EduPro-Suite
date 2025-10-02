@@ -141,7 +141,7 @@ export default function GuardianDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
-                {t('dashboard.title')} 👨‍👩‍👧‍👦
+                {t('dashboard.title')}
               </h1>
               <p className="text-teal-100 text-base sm:text-lg">
                 {t('dashboard.subtitle')}
