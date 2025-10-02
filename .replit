@@ -42,6 +42,6 @@ localPort = 45757
 externalPort = 3001
 
 [deployment]
-deploymentTarget = "autoscale"
-run = ["npm", "start"]
+deploymentTarget = "vm"
+run = ["npx", "tsx", "server.ts"]
 build = ["npm", "run", "build"]
