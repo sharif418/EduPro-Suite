@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5000 -H 0.0.0.0",
+    "dev": "node -r ./env-setup.js ./node_modules/.bin/next dev -p 5000 -H 0.0.0.0",
     "dev:custom": "tsx server.ts",
     "build": "next build",
     "build:production": "NODE_ENV=production next build",
